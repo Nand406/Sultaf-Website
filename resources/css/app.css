@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+    /* ===== Warna utama — dipertahankan, jadi anchor brand ===== */
+    --color-sultaf-maroon: #7A1620;
+    --color-sultaf-maroon-dark: #4A0E14;
+    --color-sultaf-maroon-light: #9C2A33;
+
+    /* ===== BARU: aksen kuningan/kunyit, dipertegas dari versi sebelumnya ===== */
+    --color-sultaf-gold: #BF8B3D;
+    --color-sultaf-gold-light: #E3C68A;
+
+    /* ===== BARU: terracotta — identitas panel Dapur, warna oven tanah liat ===== */
+    --color-sultaf-clay: #C1613D;
+    --color-sultaf-clay-dark: #93452A;
+
+    /* ===== Netral hangat — diganti dari abu-abu dingin ===== */
+    --color-sultaf-cream: #FBF4EA;
+    --color-sultaf-cream-dark: #F0E4D3;
+    --color-sultaf-ink: #2B1B1B;
+    --color-sultaf-muted: #8A7566;
+    --color-sultaf-border: #E4D3BE;
+
+    /* ===== Fungsional — dihangatkan supaya tetap 1 keluarga warna ===== */
+    --color-sultaf-success: #4F7A52;
+    --color-sultaf-success-soft: #EAF1E7;
+    --color-sultaf-warning: #BF8B3D;
+    --color-sultaf-warning-soft: #FAF0DD;
+    --color-sultaf-danger: #B23A2E;
+    --color-sultaf-danger-soft: #FBEAE7;
+
+    --font-serif: "Playfair Display", Georgia, serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui;
+}
+
+@layer base {
+    body {
+        @apply bg-sultaf-cream text-sultaf-ink font-sans antialiased;
+    }
+    h1, h2, h3 { @apply font-serif; }
+}
+
+@layer components {
+    /* ===== Tekstur signature — kisi geometris sangat tipis, dipakai di background utama ===== */
+    .bg-sultaf-pattern {
+        background-color: var(--color-sultaf-cream);
+        background-image:
+            repeating-linear-gradient(45deg, rgba(122,22,32,0.035) 0, rgba(122,22,32,0.035) 1px, transparent 1px, transparent 24px),
+            repeating-linear-gradient(-45deg, rgba(122,22,32,0.035) 0, rgba(122,22,32,0.035) 1px, transparent 1px, transparent 24px);
+    }
+    /* Versi gelap dari tekstur yang sama, dipakai di sidebar maroon-dark */
+    .bg-sultaf-pattern-dark {
+        background-image:
+            repeating-linear-gradient(45deg, rgba(255,255,255,0.035) 0, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 24px),
+            repeating-linear-gradient(-45deg, rgba(255,255,255,0.035) 0, rgba(255,255,255,0.035) 1px, transparent 1px, transparent 24px);
+    }
+
+    .btn-primary {
+        @apply w-full bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white font-semibold
+               tracking-wide uppercase text-sm py-3.5 rounded-xl transition-colors;
+    }
+    .input-field {
+        @apply w-full border border-sultaf-border bg-sultaf-cream/60 rounded-lg px-4 py-3
+               text-sultaf-ink placeholder:text-sultaf-muted focus:outline-none
+               focus:ring-2 focus:ring-sultaf-maroon/30 focus:border-sultaf-maroon;
+    }
+
+    /* ===== BARU: kartu standar untuk semua panel staff, ganti "bg-white border-gray-100" ===== */
+    .staff-card {
+        @apply bg-white rounded-2xl border border-sultaf-border/70 shadow-sm shadow-sultaf-maroon/[0.03];
+    }
+    .staff-label {
+        @apply text-xs text-sultaf-muted uppercase tracking-wide font-medium;
+    }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
