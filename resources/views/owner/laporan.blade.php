@@ -31,35 +31,34 @@
         </form>
     </div>
 
-    <p class="text-xs text-sultaf-muted mb-6">
-        {{ __('Showing data from') }} <strong class="text-sultaf-ink">{{ $from->translatedFormat('d M Y') }}</strong>
-        {{ __('to') }} <strong class="text-sultaf-ink">{{ $to->translatedFormat('d M Y') }}</strong>
-    </p>
-
-    {{-- ===================== RINGKASAN ===================== --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-6">
-        <div class="staff-card p-5">
-            <p class="staff-label mb-2">{{ __('Total Revenue') }}</p>
-            <p class="font-serif text-2xl font-bold text-sultaf-ink">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</p>
-        </div>
-        <div class="staff-card p-5">
-            <p class="staff-label mb-2">{{ __('Total Profit') }}</p>
-            <p class="font-serif text-2xl font-bold text-sultaf-success">Rp {{ number_format($totalKeuntungan, 0, ',', '.') }}</p>
-            <p class="text-xs text-sultaf-muted mt-1">
-                {{ $totalOmzet > 0 ? round($totalKeuntungan / $totalOmzet * 100) : 0 }}% {{ __('margin') }}
-            </p>
-        </div>
-        <div class="staff-card p-5">
-            <p class="staff-label mb-2">{{ __('Total Transactions') }}</p>
-            <p class="font-serif text-2xl font-bold text-sultaf-ink">{{ number_format($totalTransaksi) }}</p>
-        </div>
-        <div class="staff-card p-5">
-            <p class="staff-label mb-2">{{ __('Average Order Value') }}</p>
-            <p class="font-serif text-2xl font-bold text-sultaf-ink">Rp {{ number_format($rataRataTransaksi, 0, ',', '.') }}</p>
-        </div>
-        <div class="staff-card p-5">
-            <p class="staff-label mb-2">{{ __('Total Discounts Given') }}</p>
-            <p class="font-serif text-2xl font-bold text-sultaf-danger">Rp {{ number_format($totalDiskon, 0, ',', '.') }}</p>
+    {{-- ===================== HERO BAND — 5 metrik jadi satu pita, bukan kotak lepas ===================== --}}
+    <div class="bg-sultaf-maroon-dark bg-sultaf-pattern-dark rounded-2xl p-6 lg:p-8 mb-6 text-white">
+        <p class="text-xs text-white/50 mb-5">
+            {{ __('Showing data from') }} <strong class="text-white/80">{{ $from->translatedFormat('d M Y') }}</strong>
+            {{ __('to') }} <strong class="text-white/80">{{ $to->translatedFormat('d M Y') }}</strong>
+        </p>
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 divide-x divide-white/10">
+            <div>
+                <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">{{ __('Total Revenue') }}</p>
+                <p class="font-serif text-2xl lg:text-3xl font-bold">Rp {{ number_format($totalOmzet, 0, ',', '.') }}</p>
+            </div>
+            <div class="pl-6 lg:pl-8">
+                <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">{{ __('Total Profit') }}</p>
+                <p class="font-serif text-2xl lg:text-3xl font-bold text-sultaf-gold-light">Rp {{ number_format($totalKeuntungan, 0, ',', '.') }}</p>
+                <p class="text-xs text-white/50 mt-1">{{ $totalOmzet > 0 ? round($totalKeuntungan / $totalOmzet * 100) : 0 }}% {{ __('margin') }}</p>
+            </div>
+            <div class="pl-6 lg:pl-8">
+                <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">{{ __('Total Transactions') }}</p>
+                <p class="font-serif text-2xl lg:text-3xl font-bold">{{ number_format($totalTransaksi) }}</p>
+            </div>
+            <div class="pl-6 lg:pl-8">
+                <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">{{ __('Average Order Value') }}</p>
+                <p class="font-serif text-2xl lg:text-3xl font-bold">Rp {{ number_format($rataRataTransaksi, 0, ',', '.') }}</p>
+            </div>
+            <div class="pl-6 lg:pl-8 col-span-2 lg:col-span-1">
+                <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">{{ __('Total Discounts Given') }}</p>
+                <p class="font-serif text-2xl lg:text-3xl font-bold text-red-300">Rp {{ number_format($totalDiskon, 0, ',', '.') }}</p>
+            </div>
         </div>
     </div>
 
@@ -76,7 +75,7 @@
     </div>
 
     {{-- ===================== TOP MENU + KATEGORI ===================== --}}
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 mb-6">
 
         <div class="staff-card overflow-hidden">
             <div class="px-5 py-4 border-b border-sultaf-border">
@@ -185,7 +184,6 @@
         </div>
     </div>
 
-    {{-- Chart.js di-hosting sendiri (bukan CDN) supaya tidak bergantung koneksi internet --}}
     <script src="{{ asset('vendor/chartjs/chart.umd.js') }}"></script>
     <script>
         new Chart(document.getElementById('omzetChart'), {
@@ -194,17 +192,12 @@
                 labels: @json($omzetHarian->pluck('date')),
                 datasets: [{
                     data: @json($omzetHarian->pluck('total')),
-                    borderColor: '#7A1620',
-                    backgroundColor: 'rgba(122, 22, 32, 0.08)',
-                    fill: true,
-                    tension: 0.35,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#7A1620',
+                    borderColor: '#7A1620', backgroundColor: 'rgba(122, 22, 32, 0.08)',
+                    fill: true, tension: 0.35, pointRadius: 3, pointBackgroundColor: '#7A1620',
                 }]
             },
             options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
+                responsive: true, plugins: { legend: { display: false } },
                 scales: {
                     y: { ticks: { color: '#8A7566', font: { size: 11 } }, grid: { color: '#F0E4D3' } },
                     x: { grid: { display: false }, ticks: { color: '#8A7566', font: { size: 11 } } }
@@ -218,17 +211,12 @@
                 labels: @json($keuntunganHarian->pluck('date')),
                 datasets: [{
                     data: @json($keuntunganHarian->pluck('total')),
-                    borderColor: '#4F7A52',
-                    backgroundColor: 'rgba(79, 122, 82, 0.08)',
-                    fill: true,
-                    tension: 0.35,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#4F7A52',
+                    borderColor: '#4F7A52', backgroundColor: 'rgba(79, 122, 82, 0.08)',
+                    fill: true, tension: 0.35, pointRadius: 3, pointBackgroundColor: '#4F7A52',
                 }]
             },
             options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
+                responsive: true, plugins: { legend: { display: false } },
                 scales: {
                     y: { ticks: { color: '#8A7566', font: { size: 11 } }, grid: { color: '#F0E4D3' } },
                     x: { grid: { display: false }, ticks: { color: '#8A7566', font: { size: 11 } } }
@@ -247,11 +235,7 @@
                     borderWidth: 0,
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: { legend: { display: false } },
-                cutout: '65%',
-            }
+            options: { responsive: true, plugins: { legend: { display: false } }, cutout: '65%' }
         });
         @endif
     </script>
