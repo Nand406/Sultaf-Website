@@ -1,10 +1,10 @@
 <x-layouts.app title="{{ __('Payment') }} - Sultaf">
 
-    <div class="px-5 lg:px-10 xl:px-16 pt-6">
+    <div class="px-5 lg:px-0 pt-6 pb-6">
 
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-                <a href="{{ route('checkout.details') }}" class="text-sultaf-ink">
+                <a href="{{ route('checkout.details') }}" class="text-sultaf-ink hover:text-sultaf-maroon">
                     <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
                 </a>
                 <h1 class="font-serif text-2xl font-bold text-sultaf-maroon">{{ __('Checkout') }}</h1>
@@ -15,7 +15,7 @@
         <x-checkout-steps :current="3" />
 
         @if ($errors->any())
-            <div class="mb-4 bg-red-50 rounded-xl px-4 py-3 text-sm text-red-600 space-y-1">
+            <div class="mb-4 bg-sultaf-danger-soft rounded-xl px-4 py-3 text-sm text-sultaf-danger space-y-1">
                 @foreach ($errors->all() as $error)<p>{{ $error }}</p>@endforeach
             </div>
         @endif
@@ -39,7 +39,7 @@
                             <label class="cursor-pointer">
                                 <input type="radio" name="metode_pembayaran" value="{{ $value }}"
                                        class="peer hidden" {{ $loop->first ? 'checked' : '' }}>
-                                <div class="flex items-center gap-3 border border-sultaf-border rounded-xl px-4 py-3.5
+                                <div class="flex items-center gap-3 border border-sultaf-border bg-white rounded-xl px-4 py-3.5
                                             peer-checked:border-sultaf-maroon peer-checked:bg-sultaf-maroon/5 transition-colors">
                                     <span class="text-xl">{{ $opt['icon'] }}</span>
                                     <span class="font-medium text-sultaf-ink">{{ $opt['label'] }}</span>
@@ -50,7 +50,7 @@
 
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-sultaf-ink mb-2">{{ __('Upload Payment Proof') }}</label>
-                        <label id="uploadLabel" class="flex flex-col items-center justify-center gap-2 border-2 border-dashed
+                        <label class="flex flex-col items-center justify-center gap-2 border-2 border-dashed bg-white
                                        border-sultaf-border rounded-xl py-8 cursor-pointer hover:border-sultaf-maroon transition-colors">
                             <svg class="w-7 h-7 text-sultaf-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                 <path d="M12 16V4M7 9l5-5 5 5M5 20h14"/>
@@ -80,32 +80,32 @@
                 </div>
 
                 <div class="w-full lg:w-80 xl:w-96 shrink-0 lg:sticky lg:top-24">
-                    <div class="bg-sultaf-maroon text-white rounded-2xl p-5">
+                    <div class="bg-sultaf-maroon-dark bg-sultaf-pattern-dark text-white rounded-2xl p-5">
                         <div class="flex justify-between items-center mb-4">
                             <span class="font-semibold text-lg">{{ __('Order Summary') }}</span>
-                            <span class="text-xs bg-white/20 rounded-full px-2.5 py-1">
+                            <span class="text-xs bg-white/15 rounded-full px-2.5 py-1">
                                 {{ array_sum(session('cart', [])) }} {{ __('items') }}
                             </span>
                         </div>
-                        <div class="space-y-2.5 text-sm border-b border-white/20 pb-4 mb-4">
+                        <div class="space-y-2.5 text-sm border-b border-white/15 pb-4 mb-4">
                             <div class="flex justify-between">
-                                <span class="text-white/70">{{ __('Subtotal') }}</span>
+                                <span class="text-white/60">{{ __('Subtotal') }}</span>
                                 <span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-white/70">{{ __('Tax (10%)') }}</span>
+                                <span class="text-white/60">{{ __('Tax (10%)') }}</span>
                                 <span>Rp {{ number_format($tax, 0, ',', '.') }}</span>
                             </div>
                             @if ($diskon > 0)
                                 @php $diskonPercent = $subtotal > 0 ? round($diskon / $subtotal * 100) : 0; @endphp
-                                <div class="flex justify-between text-amber-200">
+                                <div class="flex justify-between text-sultaf-gold-light">
                                     <span>{{ __('Member Discount') }} ({{ $diskonPercent }}%)</span>
                                     <span>-Rp {{ number_format($diskon, 0, ',', '.') }}</span>
                                 </div>
                             @endif
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-white/80 text-sm uppercase tracking-wide">{{ __('Total Amount') }}</span>
+                            <span class="text-white/60 text-sm uppercase tracking-wide">{{ __('Total Amount') }}</span>
                             <span class="font-serif text-2xl font-bold">Rp {{ number_format($total, 0, ',', '.') }}</span>
                         </div>
                     </div>

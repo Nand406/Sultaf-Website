@@ -62,8 +62,8 @@
     <div class="sticky top-0 z-10 bg-sultaf-cream/95 backdrop-blur px-5 lg:px-0 pt-5 pb-4">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2 lg:gap-3">
-                <div class="w-8 h-8 lg:w-11 lg:h-11 rounded-lg lg:rounded-xl bg-sultaf-maroon flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" class="w-4 h-4 lg:w-5 lg:h-5 text-white" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <div class="w-9 h-9 lg:w-11 lg:h-11 rounded-xl bg-sultaf-maroon flex items-center justify-center">
+                    <svg viewBox="0 0 24 24" class="w-4 h-4 lg:w-5 lg:h-5 text-sultaf-gold-light" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
                         <path d="M5 3v6a2 2 0 0 0 2 2v10M5 3v6M9 3v6M7 11V3"/>
                         <path d="M19 3c-2.5 1-3.5 4-2 7l1 2-3 9M19 3l-3 9"/>
                     </svg>
@@ -88,16 +88,16 @@
                         @endif
                     </a>
 
-                    <a href="{{ route('notifications.index') }}" class="w-8 h-8 rounded-full bg-white border border-sultaf-border flex items-center justify-center text-sultaf-muted">
+                    <a href="{{ route('notifications.index') }}" class="w-8 h-8 rounded-full bg-white border border-sultaf-border flex items-center justify-center text-sultaf-muted hover:text-sultaf-maroon">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="w-8 h-8 rounded-full bg-white border border-sultaf-border flex items-center justify-center text-sultaf-muted">
+                    <a href="{{ route('login') }}" class="w-8 h-8 rounded-full bg-white border border-sultaf-border flex items-center justify-center text-sultaf-muted hover:text-sultaf-maroon">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6"/></svg>
                     </a>
                 @endauth
 
-                <a href="{{ route('cart.index') }}" class="relative w-8 h-8 rounded-full bg-white border border-sultaf-border flex items-center justify-center text-sultaf-muted">
+                <a href="{{ route('cart.index') }}" class="relative w-8 h-8 rounded-full bg-white border border-sultaf-border flex items-center justify-center text-sultaf-muted hover:text-sultaf-maroon">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/>
                         <path d="M1 1h4l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L23 6H6"/>
@@ -110,14 +110,32 @@
                 </a>
             </div>
         </div>
+    </div>
 
-        <div class="flex gap-2 mt-5 overflow-x-auto no-scrollbar pb-1">
+    {{-- ===================== HERO BANNER ===================== --}}
+    <div class="px-5 lg:px-0 mb-6">
+        <div class="bg-sultaf-maroon-dark bg-sultaf-pattern-dark rounded-2xl px-6 py-8 lg:px-10 lg:py-12 text-white relative overflow-hidden">
+            <div class="relative z-10 max-w-xl">
+                <p class="text-[11px] uppercase tracking-[0.2em] text-sultaf-gold-light mb-3">
+                    {{ __('Indonesian Gastronomy') }} <em class="italic">{{ __('Refined') }}</em>
+                </p>
+                <h1 class="font-serif text-3xl lg:text-4xl font-bold leading-tight mb-3">
+                    {{ __('Prepared with heritage, served with heart.') }}
+                </h1>
+                <p class="text-sm text-white/60">Sultaf Yogyakarta Main Branch</p>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===================== KATEGORI ===================== --}}
+    <div class="px-5 lg:px-0 mb-5">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
             @foreach ($categories as $cat)
                 <a href="{{ route('menu.index', ['category' => $cat->slug]) }}"
                    class="shrink-0 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
                           {{ $activeCategory === $cat->slug
                                 ? 'bg-sultaf-maroon text-white'
-                                : 'bg-white text-sultaf-ink border border-sultaf-border' }}">
+                                : 'bg-white text-sultaf-ink border border-sultaf-border hover:border-sultaf-maroon/40' }}">
                     {{ __($cat->name) }}
                 </a>
             @endforeach
@@ -125,9 +143,9 @@
     </div>
 
     {{-- ===================== DAFTAR MENU ===================== --}}
-    <div class="px-5 lg:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 mt-4 pb-6">
+    <div class="px-5 lg:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-6">
         @forelse ($menus as $menu)
-            <div class="bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col {{ $menu->habis ? 'grayscale opacity-75' : '' }}">
+            <div class="bg-white rounded-2xl overflow-hidden border border-sultaf-border/70 shadow-sm flex flex-col {{ $menu->habis ? 'grayscale opacity-75' : 'hover:shadow-md transition-shadow' }}">
                 <div class="relative h-44">
                     @if ($menu->foto_makanan)
                         <img src="{{ asset('storage/'.$menu->foto_makanan) }}" alt="{{ __($menu->nama_makanan) }}"
@@ -146,12 +164,12 @@
                         </div>
                     @else
                         <div class="absolute top-3 left-3 flex items-center gap-1 bg-white/95 rounded-full px-2 py-1 text-xs font-semibold text-sultaf-ink">
-                            <svg class="w-3.5 h-3.5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.9l-6.2 3.4 1.6-6.8L2.2 8.9l6.9-.6L12 2z"/></svg>
+                            <svg class="w-3.5 h-3.5 text-sultaf-gold" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.9l-6.2 3.4 1.6-6.8L2.2 8.9l6.9-.6L12 2z"/></svg>
                             {{ number_format($menu->rating, 1) }}
                         </div>
 
                         @if ($menu->is_halal)
-                            <span class="absolute top-3 right-3 bg-emerald-50 text-emerald-700 text-[11px] font-bold tracking-wide px-2.5 py-1 rounded-full">{{ __('HALAL') }}</span>
+                            <span class="absolute top-3 right-3 bg-sultaf-success-soft text-sultaf-success text-[11px] font-bold tracking-wide px-2.5 py-1 rounded-full">{{ __('HALAL') }}</span>
                         @endif
                     @endif
                 </div>
@@ -184,7 +202,7 @@
                                 +
                             </button>
                         @else
-                            <span class="text-xs font-semibold text-gray-400 border border-gray-300 rounded-lg px-3 py-2">
+                            <span class="text-xs font-semibold text-sultaf-muted border border-sultaf-border rounded-lg px-3 py-2">
                                 {{ __('Unavailable') }}
                             </span>
                         @endif
@@ -221,17 +239,8 @@
             document.body.style.overflow = '';
         }
 
-        function increaseQty() {
-            currentQty++;
-            updateQty();
-        }
-
-        function decreaseQty() {
-            if (currentQty > 1) {
-                currentQty--;
-                updateQty();
-            }
-        }
+        function increaseQty() { currentQty++; updateQty(); }
+        function decreaseQty() { if (currentQty > 1) { currentQty--; updateQty(); } }
 
         function updateQty() {
             document.getElementById('qtyDisplay').textContent = currentQty;

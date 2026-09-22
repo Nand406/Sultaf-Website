@@ -9,7 +9,7 @@
             <div class="flex flex-col items-center gap-1.5">
                 <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold
                             {{ $num < $current ? 'bg-sultaf-maroon text-white'
-                               : ($num === $current ? 'bg-sultaf-maroon text-white ring-4 ring-sultaf-maroon/20' : 'bg-white border border-sultaf-border text-sultaf-muted') }}">
+                               : ($num === $current ? 'bg-sultaf-maroon text-white ring-4 ring-sultaf-maroon/15' : 'bg-white border border-sultaf-border text-sultaf-muted') }}">
                     @if ($num < $current)
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg>
                     @else
