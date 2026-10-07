@@ -15,7 +15,8 @@
             </div>
             <div class="pt-6 sm:pt-0 sm:pl-6">
                 <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">Total Value</p>
-                <p class="font-serif text-3xl font-bold">Rp {{ number_format($menunggu->sum('total_harga'), 0, ',', '.') }}</p>
+                {{-- DIUBAH: 'total_harga' menjadi 'total_bayar' --}}
+                <p class="font-serif text-3xl font-bold">Rp {{ number_format($menunggu->sum('total_bayar'), 0, ',', '.') }}</p>
             </div>
             <div class="pt-6 sm:pt-0 sm:pl-6 flex items-center gap-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-300"></span>
@@ -48,14 +49,16 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2 mb-2">
                             <h3 class="font-semibold text-sultaf-ink">
-                                {{ $transaksi->nama_pelanggan ?? $transaksi->user->name ?? 'Pelanggan' }}
+                                {{-- DIUBAH: 'name' menjadi 'username' --}}
+                                {{ $transaksi->nama_pelanggan ?? $transaksi->user->username ?? 'Pelanggan' }}
                             </h3>
                             @if ($transaksi->no_telepon)
                                 <span class="text-xs font-medium text-sultaf-muted">{{ $transaksi->no_telepon }}</span>
                             @endif
-                            @if ($transaksi->nomor_meja)
+                            {{-- DIUBAH: 'nomor_meja' menjadi 'no_meja' --}}
+                            @if ($transaksi->no_meja)
                                 <span class="text-xs font-semibold bg-sultaf-maroon/10 text-sultaf-maroon px-2 py-0.5 rounded-full">
-                                    Table {{ str_pad($transaksi->nomor_meja, 2, '0', STR_PAD_LEFT) }}
+                                    Table {{ str_pad($transaksi->no_meja, 2, '0', STR_PAD_LEFT) }}
                                 </span>
                             @else
                                 <span class="text-xs font-semibold bg-sultaf-cream text-sultaf-muted px-2 py-0.5 rounded-full">Takeaway</span>
@@ -67,17 +70,17 @@
 
                         <p class="text-sm text-sultaf-muted mb-3">
                             Order:
-                            {{ $transaksi->items->map(fn ($i) => "{$i->qty}x {$i->menu->nama_makanan}")->join(', ') }}
+                            {{ $transaksi->detail_transaksi->map(fn ($i) => "{$i->jumlah}x {$i->menu->nama_menu}")->join(', ') }}
                         </p>
 
                         <div class="flex items-center gap-4 text-sm">
                             <span class="font-serif text-xl font-bold text-sultaf-maroon">
-                                Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}
+                                Rp {{ number_format($transaksi->total_bayar, 0, ',', '.') }}
                             </span>
                             <span class="text-sultaf-border">•</span>
-                            <span class="text-sultaf-muted">{{ $transaksi->tgl_transaksi->diffForHumans() }}</span>
+                            <span class="text-sultaf-muted">{{ $transaksi->created_at->diffForHumans() }}</span>
                             <span class="text-sultaf-border">•</span>
-                            <span class="text-sultaf-muted">#{{ $transaksi->kode_transaksi }}</span>
+                            <span class="text-sultaf-muted">#SLT-{{ str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT) }}</span>
                         </div>
                     </div>
 
@@ -91,14 +94,14 @@
                             </button>
                         </form>
 
-                        <button type="button" onclick="document.getElementById('reject-{{ $transaksi->id }}').classList.toggle('hidden')"
+                        <button type="button" onclick="document.getElementById('reject-{{ $transaksi->id_transaksi }}').classList.toggle('hidden')"
                                 class="flex-1 lg:flex-none border border-sultaf-border text-sultaf-muted hover:bg-sultaf-cream text-sm font-semibold rounded-xl py-2.5 transition-colors">
                             Reject
                         </button>
                     </div>
                 </div>
 
-                <div id="reject-{{ $transaksi->id }}" class="hidden border-t border-sultaf-border bg-sultaf-cream/50 p-4">
+                <div id="reject-{{ $transaksi->id_transaksi }}" class="hidden border-t border-sultaf-border bg-sultaf-cream/50 p-4">
                     <form method="POST" action="{{ route('kasir.pembayaran.reject', $transaksi) }}" class="flex gap-2">
                         @csrf
                         <input type="text" name="alasan" placeholder="Alasan penolakan (opsional)"

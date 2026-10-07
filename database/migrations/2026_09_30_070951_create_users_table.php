@@ -4,24 +4,21 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id(); // ID akan dibuat otomatis oleh sistem
-            $table->string('name');
-            $table->string('email')->unique();
+            // Menggunakan custom primary key sesuai ERD
+            $table->id('id_user'); 
+            $table->string('username');
             $table->string('password');
+            $table->string('no_hp');
+            $table->string('role'); // misal: 'admin', 'kasir', 'customer'
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

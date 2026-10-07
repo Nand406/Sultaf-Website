@@ -3,44 +3,66 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\PromoMessage;
+use App\Models\Notifikasi;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class PromoMessageController extends Controller
 {
     public function index(): View
     {
-        $pesanTerkirim = PromoMessage::with('pengirim')->latest()->paginate(10);
+        $notifikasis = Notifikasi::with(['user', 'member'])->latest()->paginate(15);
+        return view('admin.promo.index', compact('notifikasis'));
+    }
 
-        $jumlahMember = User::where('role', 'member')->count();
-        $jumlahSemua  = User::whereIn('role', ['pelanggan', 'member'])->count();
-
-        return view('admin.promo.index', compact('pesanTerkirim', 'jumlahMember', 'jumlahSemua'));
+    public function create(): View
+    {
+        $users = User::whereIn('role', ['customer', 'member'])->orderBy('username')->get();
+        return view('admin.promo.create', compact('users'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'judul'       => ['required', 'string', 'max:255'],
-            'pesan'       => ['required', 'string', 'max:1000'],
-            'target_role' => ['required', 'in:semua,member'],
+            'judul'    => ['required', 'string', 'max:255'],
+            'id_pesan' => ['required', 'string'],
+            'target'   => ['required', 'in:all,specific'],
+            'id_user'  => ['nullable', 'exists:users,id_user'],
         ]);
 
-        $validated['dikirim_oleh'] = Auth::id();
+        if ($validated['target'] === 'all') {
+            $users = User::whereIn('role', ['customer', 'member'])->get();
 
-        PromoMessage::create($validated);
+            foreach ($users as $user) {
+                Notifikasi::create([
+                    'id_user'   => $user->id_user,
+                    'id_member' => $user->member->id_member ?? null,
+                    'id_pesan'  => $validated['id_pesan'],
+                    'judul'     => $validated['judul'],
+                ]);
+            }
 
-        return back()->with('success', 'Pesan promosi berhasil dikirim.');
+            return redirect()->route('admin.promo.index')
+                ->with('success', "Notifikasi berhasil dikirim ke {$users->count()} user.");
+        }
+
+        $user = User::findOrFail($validated['id_user']);
+        Notifikasi::create([
+            'id_user'   => $user->id_user,
+            'id_member' => $user->member->id_member ?? null,
+            'id_pesan'  => $validated['id_pesan'],
+            'judul'     => $validated['judul'],
+        ]);
+
+        return redirect()->route('admin.promo.index')
+            ->with('success', "Notifikasi berhasil dikirim ke {$user->username}.");
     }
 
-    public function destroy(PromoMessage $promo): RedirectResponse
+    public function destroy(Notifikasi $notifikasi): RedirectResponse
     {
-        $promo->delete();
-
-        return back()->with('success', 'Pesan promosi berhasil dihapus.');
+        $notifikasi->delete();
+        return back()->with('success', 'Notifikasi berhasil dihapus.');
     }
 }

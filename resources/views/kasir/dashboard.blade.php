@@ -47,9 +47,14 @@
                 <tbody class="divide-y divide-sultaf-border">
                     @forelse ($recentOrders as $order)
                         <tr>
-                            <td class="px-5 py-3 font-medium text-sultaf-maroon">#{{ $order->kode_transaksi }}</td>
-                            <td class="px-5 py-3 text-sultaf-ink">{{ $order->nama_pelanggan ?? $order->user->name ?? 'Walk-in' }}</td>
-                            <td class="px-5 py-3 text-sultaf-ink">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
+                            {{-- DIUBAH: Menggunakan generate ID, bukan kode_transaksi --}}
+                            <td class="px-5 py-3 font-medium text-sultaf-maroon">
+                                #SLT-{{ str_pad($order->id_transaksi, 5, '0', STR_PAD_LEFT) }}
+                            </td>
+                            {{-- DIUBAH: Menggunakan username dari relasi user --}}
+                            <td class="px-5 py-3 text-sultaf-ink">{{ $order->user->username ?? 'Walk-in' }}</td>
+                            {{-- DIUBAH: total_harga menjadi total_bayar --}}
+                            <td class="px-5 py-3 text-sultaf-ink">Rp {{ number_format($order->total_bayar, 0, ',', '.') }}</td>
                             <td class="px-5 py-3">
                                 <span class="text-xs font-semibold px-2.5 py-1 rounded-full
                                     {{ match($order->status_pembayaran) {

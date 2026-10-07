@@ -33,51 +33,62 @@
                     <div class="flex justify-between items-start mb-5 pb-4 border-b border-sultaf-border">
                         <div>
                             <p class="text-xs text-sultaf-muted uppercase tracking-wide">{{ __('Order Number') }}</p>
-                            <p class="font-serif text-xl font-bold text-sultaf-maroon mt-0.5">#{{ $transaksi->kode_transaksi }}</p>
+                            {{-- DIUBAH: Menggunakan ID Transaksi yang di-generate otomatis --}}
+                            <p class="font-serif text-xl font-bold text-sultaf-maroon mt-0.5">
+                                #SLT-{{ str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT) }}
+                            </p>
                         </div>
                         <div class="text-right">
                             <p class="text-xs text-sultaf-muted uppercase tracking-wide">{{ __('Date & Time') }}</p>
-                            <p class="text-sm font-medium text-sultaf-ink mt-0.5">{{ $transaksi->tgl_transaksi->format('M d, Y H:i') }}</p>
+                            {{-- DIUBAH: Menggunakan created_at yang otomatis diisi Laravel --}}
+                            <p class="text-sm font-medium text-sultaf-ink mt-0.5">
+                                {{ $transaksi->created_at ? $transaksi->created_at->format('M d, Y H:i') : '-' }}
+                            </p>
                         </div>
                     </div>
 
                     <div class="divide-y divide-sultaf-border">
-                        @foreach ($transaksi->items as $item)
+                        @foreach ($transaksi->detail_transaksi as $item)
                             <div class="flex items-center justify-between py-3">
-                                <div class="flex items-center gap-3">
-                                    <span class="text-xs bg-sultaf-cream-dark font-semibold rounded-lg px-2 py-1 shrink-0">{{ $item->qty }}x</span>
-                                    <div>
-                                        <p class="font-medium text-sultaf-ink">{{ __($item->menu->nama_makanan) }}</p>
-                                        <p class="text-xs text-sultaf-muted">{{ Str::limit(__($item->menu->deskripsi), 50) }}</p>
-                                    </div>
+                                <div>
+                                    <p class="font-semibold">{{ $item->menu->nama_menu ?? 'Menu Tidak Ditemukan' }}</p>
+                                    <p class="text-sm text-gray-500">Jumlah: {{ $item->jumlah }}</p>
                                 </div>
-                                <span class="font-medium text-sultaf-ink shrink-0 ml-2">
-                                    Rp {{ number_format($item->harga_satuan * $item->qty, 0, ',', '.') }}
-                                </span>
+                                <div class="text-right">
+                                    <p>Rp {{ number_format($item->harga_satuan, 0, ',', '.') }}</p>
+                                    <p class="text-sm font-bold">Subtotal: Rp {{ number_format($item->subtotal, 0, ',', '.') }}</p>
+                                </div>
                             </div>
                         @endforeach
                     </div>
 
                     <div class="border-t border-sultaf-border pt-4 mt-2 space-y-2 text-sm">
+                        @php
+                            // Menghitung subtotal dari tabel detail_transaksi
+                            $subtotal = $transaksi->detail_transaksi->sum('subtotal');
+                            // Menghitung pajak 10%
+                            $pajak = $subtotal * 0.10;
+                        @endphp
+
                         <div class="flex justify-between text-sultaf-muted">
                             <span>{{ __('Subtotal') }}</span>
-                            <span>Rp {{ number_format($transaksi->subtotal, 0, ',', '.') }}</span>
+                            <span>Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between text-sultaf-muted">
                             <span>{{ __('Tax (10%)') }}</span>
-                            <span>Rp {{ number_format($transaksi->pajak, 0, ',', '.') }}</span>
+                            <span>Rp {{ number_format($pajak, 0, ',', '.') }}</span>
                         </div>
-                        @if ($transaksi->diskon_member > 0)
-                            @php $diskonPercent = $transaksi->subtotal > 0 ? round($transaksi->diskon_member / $transaksi->subtotal * 100) : 0; @endphp
+                        @if ($transaksi->diskon > 0)
+                            @php $diskonPercent = $subtotal > 0 ? round($transaksi->diskon / $subtotal * 100) : 0; @endphp
                             <div class="flex justify-between text-sultaf-success">
                                 <span>{{ __('Loyalty Discount') }} ({{ $diskonPercent }}%)</span>
-                                <span>-Rp {{ number_format($transaksi->diskon_member, 0, ',', '.') }}</span>
+                                <span>-Rp {{ number_format($transaksi->diskon, 0, ',', '.') }}</span>
                             </div>
                         @endif
                         <div class="flex justify-between items-center pt-3 border-t border-sultaf-border">
                             <span class="font-semibold text-sultaf-ink text-base">{{ __('Grand Total') }}</span>
                             <span class="font-serif text-2xl font-bold text-sultaf-maroon">
-                                Rp {{ number_format($transaksi->total_harga, 0, ',', '.') }}
+                                Rp {{ number_format($transaksi->total_bayar, 0, ',', '.') }}
                             </span>
                         </div>
                     </div>

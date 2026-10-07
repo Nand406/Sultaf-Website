@@ -10,37 +10,49 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    protected $table = 'users';
+    protected $primaryKey = 'id_user';
+    public $timestamps = true;
+
     protected $fillable = [
-        'name', 'email', 'password', 'role', 'phone', 'avatar', 'points',
+        'username', 
+        'password', 
+        'no_hp', 
+        'role'
     ];
 
     protected $hidden = [
-        'password', 'remember_token',
+        'password',
+        'remember_token',
     ];
 
-    protected function casts(): array
+    // Relasi ke Member
+    public function member()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'points' => 'integer',
-        ];
+        return $this->hasOne(Member::class, 'id_user', 'id_user');
     }
 
-    public function transaksi()
+    // Relasi ke Transaksi Penjualan
+    public function transaksi_penjualans()
     {
-        return $this->hasMany(TransaksiPenjualan::class);
+        return $this->hasMany(TransaksiPenjualan::class, 'id_user', 'id_user');
     }
 
-    public function isAdmin(): bool { return $this->role === 'admin'; }
-    public function isOwner(): bool { return $this->role === 'owner'; }
-    public function isKasir(): bool { return $this->role === 'kasir'; }
-    public function isDapur(): bool { return $this->role === 'dapur'; }
-    public function isMember(): bool { return $this->role === 'member'; }
-    public function isPelanggan(): bool { return $this->role === 'pelanggan'; }
-
-    public function isStaff(): bool
+    // Relasi ke Notifikasi
+    public function notifikasis()
     {
-        return in_array($this->role, ['admin', 'owner', 'kasir', 'dapur']);
+        return $this->hasMany(Notifikasi::class, 'id_user', 'id_user');
+    }
+
+    // --- FUNGSI BANTUAN ROLE ---
+    public function isOwner()   { return $this->role === 'owner'; }
+    public function isAdmin()   { return $this->role === 'admin'; }
+    public function isKasir()   { return $this->role === 'kasir'; }
+    public function isDapur()   { return $this->role === 'dapur'; }
+    public function isCustomer(){ return $this->role === 'customer'; }
+    
+    public function isMember()
+    {
+        return $this->member()->exists();
     }
 }

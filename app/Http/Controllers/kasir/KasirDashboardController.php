@@ -22,7 +22,7 @@ class KasirDashboardController extends Controller
         ];
 
         $recentOrders = TransaksiPenjualan::with('user')
-            ->latest('tgl_transaksi')
+            ->latest() // <--- DIUBAH: Hapus 'tgl_transaksi', pakai created_at bawaan Laravel
             ->limit(8)
             ->get();
 

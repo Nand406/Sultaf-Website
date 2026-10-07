@@ -14,10 +14,10 @@ class PesananController extends Controller
     {
         // Kasir bisa MELIHAT seluruh alur (pending & cooking termasuk),
         // tapi hanya boleh MENGUBAH status ready->diantar dan diantar->selesai.
-        $pesanan = TransaksiPenjualan::with(['user', 'items.menu'])
+                $pesanan = TransaksiPenjualan::with(['user', 'detail_transaksi.menu']) // Ubah 'items.menu' menjadi 'detail_transaksi.menu'
             ->where('status_pembayaran', 'terverifikasi')
             ->whereIn('status_pesanan', ['pending', 'cooking', 'ready', 'diantar'])
-            ->oldest('tgl_transaksi')
+            ->oldest() // Ubah 'oldest('tgl_transaksi')' menjadi 'oldest()' saja
             ->get()
             ->groupBy('status_pesanan');
 

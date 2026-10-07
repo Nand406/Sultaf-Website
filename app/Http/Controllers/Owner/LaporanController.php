@@ -3,145 +3,130 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Models\TransaksiItem;
 use App\Models\TransaksiPenjualan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class LaporanController extends Controller
 {
     public function index(Request $request): View
     {
-        $preset = $request->get('preset', '30hari');
-        [$from, $to] = $this->resolveDateRange($preset, $request->get('from'), $request->get('to'));
+        $preset = $request->input('preset', '7hari');
+
+        // Tentukan rentang tanggal berdasarkan preset (sesuai View)
+        switch ($preset) {
+            case 'hari-ini':
+                $from = now()->startOfDay();
+                $to   = now()->endOfDay();
+                break;
+            case 'bulan-ini':
+                $from = now()->startOfMonth();
+                $to   = now()->endOfMonth();
+                break;
+            case 'tahun-ini':
+                $from = now()->startOfYear();
+                $to   = now()->endOfYear();
+                break;
+            case '30hari':
+                $from = now()->subDays(30)->startOfDay();
+                $to   = now()->endOfDay();
+                break;
+            case '7hari':
+            default:
+                $from = now()->subDays(7)->startOfDay();
+                $to   = now()->endOfDay();
+                break;
+        }
+
+        if ($preset === 'custom' && $request->filled('from') && $request->filled('to')) {
+            $from = Carbon::parse($request->input('from'))->startOfDay();
+            $to   = Carbon::parse($request->input('to'))->endOfDay();
+        }
 
         $baseQuery = fn () => TransaksiPenjualan::where('status_pembayaran', 'terverifikasi')
-            ->whereBetween('tgl_transaksi', [$from->copy()->startOfDay(), $to->copy()->endOfDay()]);
+            ->whereBetween('created_at', [$from, $to]);
 
-        /* ===================== Ringkasan ===================== */
+        /* ==================== Ringkasan ==================== */
         $transaksi = $baseQuery()->get();
-
-        $totalOmzet = $transaksi->sum('total_harga');
+        $totalOmzet = $transaksi->sum('total_bayar');
         $totalTransaksi = $transaksi->count();
         $rataRataTransaksi = $totalTransaksi > 0 ? $totalOmzet / $totalTransaksi : 0;
-        $totalDiskon = $transaksi->sum('diskon_member');
+        $totalKeuntungan = $totalOmzet;
+        $totalDiskon = $transaksi->sum('diskon');
 
-        /* ===================== Item terjual (dasar keuntungan, breakdown kategori & top menu) ===================== */
-        // 'transaksi' ikut di-eager-load supaya bisa dikelompokkan per tanggal untuk grafik.
-        $itemQuery = TransaksiItem::whereHas('transaksi', fn ($q) => $q
-            ->where('status_pembayaran', 'terverifikasi')
-            ->whereBetween('tgl_transaksi', [$from->copy()->startOfDay(), $to->copy()->endOfDay()])
-        )->with(['menu.category', 'transaksi']);
-
-        $items = $itemQuery->get();
-
-        // Keuntungan per item = qty x (harga jual saat transaksi - harga modal menu saat ini)
-        $hitungKeuntunganItem = fn ($i) => $i->qty * ((float) $i->harga_satuan - (float) ($i->menu->harga_modal ?? 0));
-
-        $totalKeuntungan = $items->sum($hitungKeuntunganItem);
-
-        /* ===================== Grafik Omzet & Keuntungan per Hari ===================== */
-        $omzetHarian = $transaksi
-            ->groupBy(fn ($t) => $t->tgl_transaksi->format('Y-m-d'))
-            ->map(fn ($group, $date) => [
-                'date' => Carbon::parse($date)->translatedFormat('d M'),
-                'total' => (float) $group->sum('total_harga'),
-            ])
-            ->sortKeys()
-            ->values();
-
-        $keuntunganHarian = $items
-            ->filter(fn ($i) => $i->transaksi !== null)
-            ->groupBy(fn ($i) => $i->transaksi->tgl_transaksi->format('Y-m-d'))
-            ->map(fn ($group, $date) => [
-                'date' => Carbon::parse($date)->translatedFormat('d M'),
-                'total' => (float) $group->sum($hitungKeuntunganItem),
-            ])
-            ->sortKeys()
-            ->values();
-
-        /* ===================== Top Menu & Breakdown Kategori ===================== */
-        $topMenu = $items
-            ->groupBy('menu_id')
-            ->map(function ($group) use ($hitungKeuntunganItem) {
-                $menu = $group->first()->menu;
+        /* ==================== Top Menu ==================== */
+        $topMenu = $baseQuery()
+            ->with('detail_transaksi.menu')
+            ->get()
+            ->pluck('detail_transaksi')
+            ->flatten()
+            ->groupBy('id_menu')
+            ->map(function ($group) {
+                $subtotal = $group->sum('subtotal');
                 return [
-                    'menu' => $menu,
-                    'qty' => $group->sum('qty'),
-                    'revenue' => $group->sum(fn ($i) => $i->qty * $i->harga_satuan),
-                    'keuntungan' => $group->sum($hitungKeuntunganItem),
+                    'menu'       => $group->first()->menu,
+                    'qty'        => $group->sum('jumlah'),
+                    'revenue'    => $subtotal,
+                    'keuntungan' => $subtotal,
                 ];
             })
-            ->filter(fn ($row) => $row['menu'] !== null)
             ->sortByDesc('qty')
-            ->take(8)
+            ->take(10)
             ->values();
 
-        $kategoriBreakdown = $items
-            ->filter(fn ($i) => $i->menu !== null)
-            ->groupBy(fn ($i) => $i->menu->category->name ?? 'Lainnya')
-            ->map(fn ($group, $nama) => [
-                'kategori' => $nama,
-                'revenue' => $group->sum(fn ($i) => $i->qty * $i->harga_satuan),
-            ])
-            ->sortByDesc('revenue')
-            ->values();
+        /* ==================== Kategori Breakdown ==================== */
+        // Tidak ada tabel categories di ERD baru
+        $kategoriBreakdown = collect();
 
-        /* ===================== Metode Pembayaran ===================== */
-        $metodePembayaran = $transaksi
-            ->groupBy(fn ($t) => $t->metode_pembayaran ?? '-')
-            ->map(fn ($group, $metode) => [
-                'metode' => $metode,
-                'jumlah' => $group->count(),
-                'total' => $group->sum('total_harga'),
-            ])
-            ->sortByDesc('total')
-            ->values();
+        /* ==================== Metode Pembayaran ==================== */
+        $metodePembayaran = $baseQuery()
+            ->selectRaw('metode_pembayaran, COUNT(*) as jumlah, SUM(total_bayar) as total')
+            ->groupBy('metode_pembayaran')
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($row) => [
+                'metode' => $row->metode_pembayaran,
+                'jumlah' => $row->jumlah,
+                'total'  => $row->total,
+            ]);
 
-        /* ===================== Tipe Pesanan (Dine-in/Takeaway) ===================== */
-        $tipePesanan = $transaksi
+        /* ==================== Tipe Pesanan ==================== */
+        $tipePesanan = $baseQuery()
+            ->selectRaw('tipe_pesanan, COUNT(*) as jumlah, SUM(total_bayar) as total')
             ->groupBy('tipe_pesanan')
-            ->map(fn ($group, $tipe) => [
-                'tipe' => $tipe,
-                'jumlah' => $group->count(),
-                'total' => $group->sum('total_harga'),
-            ])
-            ->sortByDesc('total')
-            ->values();
+            ->orderByDesc('total')
+            ->get()
+            ->map(fn ($row) => [
+                'tipe'   => $row->tipe_pesanan,
+                'jumlah' => $row->jumlah,
+                'total'  => $row->total,
+            ]);
 
-        return view('owner.laporan', [
-            'from' => $from,
-            'to' => $to,
-            'preset' => $preset,
-            'totalOmzet' => $totalOmzet,
-            'totalKeuntungan' => $totalKeuntungan,
-            'totalTransaksi' => $totalTransaksi,
-            'rataRataTransaksi' => $rataRataTransaksi,
-            'totalDiskon' => $totalDiskon,
-            'omzetHarian' => $omzetHarian,
-            'keuntunganHarian' => $keuntunganHarian,
-            'topMenu' => $topMenu,
-            'kategoriBreakdown' => $kategoriBreakdown,
-            'metodePembayaran' => $metodePembayaran,
-            'tipePesanan' => $tipePesanan,
+        /* ==================== Omzet & Keuntungan Harian ==================== */
+        $harianRaw = $baseQuery()
+            ->selectRaw('DATE(created_at) as date, SUM(total_bayar) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $omzetHarian = $harianRaw->map(fn ($row) => [
+            'date'  => Carbon::parse($row->date)->translatedFormat('d M'),
+            'total' => (float) $row->total,
         ]);
-    }
 
-    protected function resolveDateRange(string $preset, ?string $from, ?string $to): array
-    {
-        $now = Carbon::now();
+        $keuntunganHarian = $harianRaw->map(fn ($row) => [
+            'date'  => Carbon::parse($row->date)->translatedFormat('d M'),
+            'total' => (float) $row->total,
+        ]);
 
-        return match ($preset) {
-            'hari-ini' => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
-            '7hari' => [$now->copy()->subDays(6)->startOfDay(), $now->copy()->endOfDay()],
-            'bulan-ini' => [$now->copy()->startOfMonth(), $now->copy()->endOfDay()],
-            'tahun-ini' => [$now->copy()->startOfYear(), $now->copy()->endOfDay()],
-            'custom' => [
-                $from ? Carbon::parse($from) : $now->copy()->subDays(29),
-                $to ? Carbon::parse($to) : $now->copy(),
-            ],
-            default => [$now->copy()->subDays(29)->startOfDay(), $now->copy()->endOfDay()], // 30hari
-        };
+        return view('owner.laporan', compact(
+            'preset', 'from', 'to',
+            'totalOmzet', 'totalTransaksi', 'rataRataTransaksi',
+            'totalKeuntungan', 'totalDiskon',
+            'topMenu', 'kategoriBreakdown',
+            'metodePembayaran', 'tipePesanan',
+            'omzetHarian', 'keuntunganHarian'
+        ));
     }
 }

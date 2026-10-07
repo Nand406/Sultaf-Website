@@ -15,7 +15,7 @@ class DapurDashboardController extends Controller
             'pending'    => TransaksiPenjualan::where('status_pesanan', 'pending')
                 ->where('status_pembayaran', 'terverifikasi')->count(),
             'cooking'    => TransaksiPenjualan::where('status_pesanan', 'cooking')->count(),
-            'menu_habis' => Menu::where('habis', true)->count(),
+            'menu_habis' => Menu::where('status_ketersediaan', 'habis')->count(),
             'total_menu' => Menu::count(),
         ];
 

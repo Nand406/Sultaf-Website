@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Benefit;
+use App\Models\Promo;
 use App\Models\TransaksiPenjualan;
-use App\Services\MemberPointService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -13,35 +12,41 @@ class RewardsController extends Controller
     public function index(): View
     {
         $user = Auth::user();
+        $member = $user->member ?? null;
+        $totalPoin = $member ? $member->total_poin : 0;
 
-        $benefits = Benefit::where('aktif', true)->orderBy('poin_dibutuhkan')->get();
+        // Ambil semua promo
+        $benefits = Promo::orderBy('minimal_poin')->get();
 
-        $pointsHistory = TransaksiPenjualan::where('user_id', $user->id)
-            ->where('status_pembayaran', 'terverifikasi')
-            ->latest('tgl_transaksi')
-            ->limit(10)
-            ->get()
-            ->map(fn ($t) => [
-                'transaksi' => $t,
-                'poin' => MemberPointService::calculatePoints((float) $t->total_harga),
-            ]);
+        // Promo yang sudah bisa diklaim
+        $claimablePromos = $benefits->filter(fn ($p) => $totalPoin >= $p->minimal_poin);
 
-        // Benefit diskon tertinggi yang SUDAH bisa dipakai — ini yang otomatis
-        // diterapkan sistem saat member checkout (lihat CheckoutController).
-        $activeDiscountBenefit = $benefits
-            ->where('tipe', 'diskon')
-            ->where('poin_dibutuhkan', '<=', $user->points)
-            ->sortByDesc('poin_dibutuhkan')
-            ->first();
+        // Promo berikutnya (untuk progress bar)
+        $nextBenefit = $benefits->first(fn ($p) => $totalPoin < $p->minimal_poin);
 
-        // Benefit berikutnya yang belum tercapai, untuk progress bar "X poin lagi"
-        $nextBenefit = $benefits
-            ->where('poin_dibutuhkan', '>', $user->points)
-            ->sortBy('poin_dibutuhkan')
-            ->first();
+        // Promo diskon yang sudah aktif (poin tertinggi yang tercapai)
+        $activeDiscountBenefit = $claimablePromos->sortByDesc('minimal_poin')->first();
+
+        // Riwayat poin dari transaksi user
+        $pointsHistory = collect();
+        if ($member) {
+            $pointsHistory = TransaksiPenjualan::where('id_user', $user->id_user)
+                ->where('status_pembayaran', 'terverifikasi')
+                ->latest()
+                ->limit(10)
+                ->get()
+                ->map(function ($trx) {
+                    return [
+                        'transaksi' => $trx,
+                        'poin'      => floor($trx->total_bayar / 10000), // 1 poin per Rp 10.000
+                    ];
+                });
+        }
 
         return view('rewards.index', compact(
-            'user', 'benefits', 'pointsHistory', 'activeDiscountBenefit', 'nextBenefit'
+            'user', 'member', 'totalPoin',
+            'benefits', 'claimablePromos', 'nextBenefit',
+            'activeDiscountBenefit', 'pointsHistory'
         ));
     }
 }

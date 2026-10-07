@@ -48,9 +48,8 @@
                     <form method="POST" action="{{ route('login.store') }}" class="space-y-5">
                         @csrf
                         <div>
-                            <label class="block text-sm font-semibold text-sultaf-ink mb-1.5">{{ __('Email Address') }}</label>
-                            <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                                   class="input-field">
+                            <label class="block text-sm font-semibold text-sultaf-ink mb-1.5">{{ __('Username') }}</label>
+                            <input type="text" name="username" value="{{ old('username') }}" required autofocus class="input-field">
                         </div>
 
                         <div>
@@ -73,8 +72,9 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-sultaf-ink mb-1.5">{{ __('Email Address') }}</label>
-                            <input type="email" name="email" value="{{ old('email') }}" required class="input-field">
+                            {{-- Diperbaiki: Label diubah menjadi Username/Email, dan ditambahkan class input-field --}}
+                            <label class="block text-sm font-semibold text-sultaf-ink mb-1.5">{{ __('Username / Email') }}</label>
+                            <input type="text" name="username" value="{{ old('username') }}" required class="input-field">
                         </div>
 
                         <div>

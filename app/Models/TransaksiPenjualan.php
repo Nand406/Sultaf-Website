@@ -2,51 +2,42 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TransaksiPenjualan extends Model
 {
-    protected $table = 'transaksi_penjualans';
+    use HasFactory;
+
+    // Sesuaikan dengan nama tabel di migration Anda
+    protected $table = 'transaksi_penjualans'; 
+    
+    // Primary key custom
+    protected $primaryKey = 'id_transaksi';
+    
+    // Aktifkan timestamps (karena migration pakai $table->timestamps())
+    public $timestamps = true; 
 
     protected $fillable = [
-        'kode_transaksi', 'user_id', 'nama_pelanggan', 'no_telepon',
-        'tipe_pesanan', 'nomor_meja',
-        'subtotal', 'pajak', 'service_charge', 'diskon_member', 'total_harga',
-        'status_pesanan', 'status_pembayaran', 'metode_pembayaran',
-        'bukti_pembayaran', 'catatan', 'tgl_transaksi',
-    ];
-
-    protected $casts = [
-        'tgl_transaksi' => 'datetime',
-    ];
+    'kode_transaksi', 'id_user', 'id_promo', 'tipe_pesanan', 
+    'status_pesanan', 'metode_pembayaran', 'diverifikasi_oleh', 
+    'total_bayar', 'uang_bayar', 'status_pembayaran', 
+    'diskon', 'total_harga', 'tgl_transaksi', 'catatan'
+];
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        // Pastikan file User.php ada di app/Models
+        return $this->belongsTo(User::class, 'id_user', 'id_user'); 
     }
 
-    public function items()
+    public function promo()
     {
-        return $this->hasMany(TransaksiItem::class, 'transaksi_penjualan_id');
+        return $this->belongsTo(Promo::class, 'id_promo', 'id_promo'); 
     }
 
-    public function updateStatusPesanan(string $status): bool
+    public function detail_transaksi()
     {
-        return $this->update(['status_pesanan' => $status]);
-    }
-
-    public function updateStatusPembayaran(string $status): bool
-    {
-        return $this->update(['status_pembayaran' => $status]);
-    }
-
-    public static function getLaporanPenjualan($from = null, $to = null)
-    {
-        return static::query()
-            ->when($from, fn ($q) => $q->whereDate('tgl_transaksi', '>=', $from))
-            ->when($to, fn ($q) => $q->whereDate('tgl_transaksi', '<=', $to))
-            ->where('status_pembayaran', 'terverifikasi')
-            ->orderByDesc('tgl_transaksi')
-            ->get();
+        return $this->hasMany(DetailTransaksi::class, 'id_transaksi', 'id_transaksi');
     }
 }

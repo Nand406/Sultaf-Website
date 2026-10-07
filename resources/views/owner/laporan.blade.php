@@ -93,7 +93,7 @@
                 <tbody class="divide-y divide-sultaf-border">
                     @forelse ($topMenu as $row)
                         <tr>
-                            <td class="px-5 py-3 text-sultaf-ink">{{ __($row['menu']->nama_makanan) }}</td>
+                            <td class="px-5 py-3 text-sultaf-ink">{{ __($row['menu']->nama_menu ?? 'Menu Dihapus') }}</td>
                             <td class="px-5 py-3 text-sultaf-muted text-right">{{ $row['qty'] }}</td>
                             <td class="px-5 py-3 text-sultaf-ink text-right font-medium">Rp {{ number_format($row['revenue'], 0, ',', '.') }}</td>
                             <td class="px-5 py-3 text-sultaf-success text-right font-medium">Rp {{ number_format($row['keuntungan'], 0, ',', '.') }}</td>

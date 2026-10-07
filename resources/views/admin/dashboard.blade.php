@@ -18,9 +18,6 @@
                 <p class="font-serif text-3xl font-bold">{{ $stats['promosi_aktif'] }}</p>
             </div>
             <div class="pl-6">
-                <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">Pesan Terkirim</p>
-                <p class="font-serif text-3xl font-bold">{{ $stats['pesan_terkirim'] }}</p>
-            </div>
         </div>
     </div>
 

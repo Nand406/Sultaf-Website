@@ -3,14 +3,12 @@
 namespace App\Http\Controllers\Kasir;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
 use App\Models\Menu;
-use App\Models\TransaksiItem;
+use App\Models\DetailTransaksi;
 use App\Models\TransaksiPenjualan;
 use App\Services\MemberPointService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class PosController extends Controller
@@ -19,21 +17,27 @@ class PosController extends Controller
 
     public function index(Request $request): View
     {
-        $categories = Category::orderBy('order')->get();
-        $activeCategory = $request->get('category', $categories->first()?->slug);
-
-        $menus = Menu::tersedia()
-            ->when($activeCategory, fn ($q) => $q->whereHas('category', fn ($q2) => $q2->where('slug', $activeCategory)))
-            ->orderBy('nama_makanan')
+        // Category sudah tidak ada di ERD baru, langsung ambil semua menu yang tersedia
+        $menus = Menu::where('status_ketersediaan', 'tersedia')
+            ->orderBy('nama_menu') // DIUBAH: 'nama_makanan' -> 'nama_menu'
             ->get();
 
+        // Variabel dummy agar View tidak error jika masih memanggil $categories
+        $categories = collect();
+        $activeCategory = null;
+
         $cart = session('pos_cart', []);
-        $cartMenus = Menu::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        // DIUBAH: primary key Menu adalah 'id_menu', bukan 'id'
+        $cartMenus = Menu::whereIn('id_menu', array_keys($cart))->get()->keyBy('id_menu');
 
         $cartItems = collect($cart)->map(function ($qty, $menuId) use ($cartMenus) {
             $menu = $cartMenus->get($menuId);
             if (! $menu) return null;
-            return ['menu' => $menu, 'qty' => $qty, 'subtotal' => $qty * (float) $menu->harga_makanan];
+            return [
+                'menu' => $menu, 
+                'qty' => $qty, 
+                'subtotal' => $qty * (float) $menu->harga // DIUBAH: 'harga_makanan' -> 'harga'
+            ];
         })->filter()->values();
 
         $subtotal = $cartItems->sum('subtotal');
@@ -49,7 +53,8 @@ class PosController extends Controller
     {
         $qty = max(1, (int) $request->input('qty', 1));
         $cart = session('pos_cart', []);
-        $cart[$menu->id] = ($cart[$menu->id] ?? 0) + $qty;
+        // DIUBAH: 'id' -> 'id_menu'
+        $cart[$menu->id_menu] = ($cart[$menu->id_menu] ?? 0) + $qty;
         session(['pos_cart' => $cart]);
 
         return back();
@@ -58,9 +63,10 @@ class PosController extends Controller
     public function decreaseItem(Menu $menu): RedirectResponse
     {
         $cart = session('pos_cart', []);
-        if (isset($cart[$menu->id])) {
-            $cart[$menu->id]--;
-            if ($cart[$menu->id] <= 0) unset($cart[$menu->id]);
+        // DIUBAH: 'id' -> 'id_menu'
+        if (isset($cart[$menu->id_menu])) {
+            $cart[$menu->id_menu]--;
+            if ($cart[$menu->id_menu] <= 0) unset($cart[$menu->id_menu]);
         }
         session(['pos_cart' => $cart]);
 
@@ -70,7 +76,8 @@ class PosController extends Controller
     public function removeItem(Menu $menu): RedirectResponse
     {
         $cart = session('pos_cart', []);
-        unset($cart[$menu->id]);
+        // DIUBAH: 'id' -> 'id_menu'
+        unset($cart[$menu->id_menu]);
         session(['pos_cart' => $cart]);
 
         return back();
@@ -82,7 +89,6 @@ class PosController extends Controller
         return back();
     }
 
-    // Proses pembayaran langsung di kasir -> otomatis terverifikasi + cek member via no HP
     public function checkout(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -99,49 +105,50 @@ class PosController extends Controller
             return back()->with('error', 'Keranjang POS masih kosong.');
         }
 
-        $menus = Menu::whereIn('id', array_keys($cart))->get()->keyBy('id');
-        $subtotal = collect($cart)->map(fn ($qty, $id) => $qty * (float) $menus[$id]->harga_makanan)->sum();
+        // DIUBAH: 'id' -> 'id_menu', 'harga_makanan' -> 'harga'
+        $menus = Menu::whereIn('id_menu', array_keys($cart))->get()->keyBy('id_menu');
+        $subtotal = collect($cart)->map(fn ($qty, $id) => $qty * (float) $menus[$id]->harga)->sum();
         $tax = round($subtotal * 0.10);
         $total = $subtotal + $tax;
 
+        // DIUBAH: Sesuaikan dengan kolom yang ada di migration baru
         $transaksi = TransaksiPenjualan::create([
-            'kode_transaksi'    => 'POS-' . strtoupper(Str::random(6)),
-            'user_id'           => null,
-            'nama_pelanggan'    => $validated['nama_pelanggan'] ?? null,
-            'no_telepon'        => $validated['no_telepon'] ?? null,
+            'id_user'           => null, // Walk-in customer
+            'id_promo'          => null,
             'tipe_pesanan'      => $validated['tipe_pesanan'],
-            'nomor_meja'        => $validated['nomor_meja'] ?? null,
-            'subtotal'          => $subtotal,
-            'pajak'             => $tax,
-            'service_charge'    => 0,
-            'diskon_member'     => 0,
-            'total_harga'       => $total,
-            // Transaksi kasir langsung: dibayar di depan, jadi otomatis terverifikasi
+            'no_meja'           => $validated['nomor_meja'] ?? null,
+            'total_bayar'       => $total,
+            'uang_bayar'        => null,
+            'diskon'            => 0,
             'status_pesanan'    => 'pending',
-            'status_pembayaran' => 'terverifikasi',
+            'status_pembayaran' => 'terverifikasi', // Kasir langsung verifikasi
             'metode_pembayaran' => $validated['metode_pembayaran'],
             'catatan'           => 'Walk-in customer',
-            'tgl_transaksi'     => now(),
         ]);
 
         foreach ($cart as $menuId => $qty) {
-            TransaksiItem::create([
-                'transaksi_penjualan_id' => $transaksi->id,
-                'menu_id'                => $menuId,
-                'qty'                    => $qty,
-                'harga_satuan'           => $menus[$menuId]->harga_makanan,
+            // DIUBAH: TransaksiItem -> DetailTransaksi, dan nama kolomnya
+            DetailTransaksi::create([
+                'id_transaksi' => $transaksi->id_transaksi, // DIUBAH: 'id' -> 'id_transaksi'
+                'id_menu'      => $menuId,                  // DIUBAH: 'menu_id' -> 'id_menu'
+                'jumlah'       => $qty,                     // DIUBAH: 'qty' -> 'jumlah'
+                'subtotal'     => $qty * (float) $menus[$menuId]->harga,
+                'harga_satuan' => $menus[$menuId]->harga,
             ]);
         }
 
         session()->forget('pos_cart');
 
-        // Verifikasi nomor HP: kalau terdaftar sebagai member, poin langsung ditambahkan
+        // Verifikasi nomor HP untuk poin member
         $member = $this->memberPoints->awardFromTransaksi($transaksi, $validated['no_telepon'] ?? null);
 
-        $flash = "Transaksi #{$transaksi->kode_transaksi} berhasil disimpan.";
+        // DIUBAH: kode_transaksi dihapus, pakai format ID baru
+        $kodeTransaksi = '#SLT-' . str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT);
+        $flash = "Transaksi {$kodeTransaksi} berhasil disimpan.";
+        
         if (! empty($validated['no_telepon'])) {
             $flash .= $member
-                ? " Nomor terdaftar sebagai member ({$member->name}) — poin berhasil ditambahkan."
+                ? " Nomor terdaftar sebagai member ({$member->user->username}) — poin berhasil ditambahkan."
                 : ' Nomor HP tidak terdaftar sebagai member.';
         }
 
@@ -150,7 +157,8 @@ class PosController extends Controller
 
     public function receipt(TransaksiPenjualan $transaksi): View
     {
-        $transaksi->load(['items.menu', 'user']);
+        // DIUBAH: 'items.menu' -> 'detail_transaksi.menu'
+        $transaksi->load(['detail_transaksi.menu', 'user']);
         return view('kasir.pos.receipt', compact('transaksi'));
     }
 }

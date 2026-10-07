@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Benefit;
+use App\Models\Promo;
 use App\Models\Menu;
 use App\Models\PromoMessage;
 use App\Models\TransaksiPenjualan;
@@ -15,30 +15,27 @@ class AdminDashboardController extends Controller
     public function index(): View
     {
         $stats = [
-            'total_menu'    => Menu::count(),
-            'menu_habis'    => Menu::where('habis', true)->count(),
-            'total_member'  => User::where('role', 'member')->count(),
-            // 'omzet_bulan_ini' SENGAJA dihapus — laporan keuangan/omset
-            // hanya boleh dilihat oleh Owner, bukan Admin.
-            'promosi_aktif' => Benefit::where('aktif', true)->count(),
-            'pesan_terkirim' => PromoMessage::count(),
+            'total_menu' => Menu::count(),
+            'menu_habis' => Menu::where('status_ketersediaan', 'habis')->count(),
+            'total_member' => User::where('role', 'member')->count(),
+            'promosi_aktif' => Promo::count(),
+            'pesan_terkirim' => 0, // <--- Tambahkan ini agar View tidak error
         ];
 
         $menuTerlaris = TransaksiPenjualan::where('status_pembayaran', 'terverifikasi')
-            ->with('items.menu')
+            ->with('detail_transaksi.menu')           // DIUBAH: 'items.menu' -> 'detail_transaksi.menu'
             ->get()
-            ->pluck('items')
+            ->pluck('detail_transaksi')               // DIUBAH: 'items' -> 'detail_transaksi'
             ->flatten()
-            ->groupBy('menu_id')
-            ->map(fn ($group) => [
+            ->groupBy('id_menu')                      // DIUBAH: 'menu_id' -> 'id_menu'
+            ->map(fn($group) => [
                 'menu' => $group->first()->menu,
-                'qty'  => $group->sum('qty'),
+                'qty' => $group->sum('jumlah'),      // DIUBAH: 'qty' -> 'jumlah'
             ])
             ->sortByDesc('qty')
-            ->take(5)
-            ->values();
+            ->take(5);
 
-        $pesanTerakhir = PromoMessage::with('pengirim')->latest()->limit(3)->get();
+        $pesanTerakhir = collect();
 
         return view('admin.dashboard', compact('stats', 'menuTerlaris', 'pesanTerakhir'));
     }

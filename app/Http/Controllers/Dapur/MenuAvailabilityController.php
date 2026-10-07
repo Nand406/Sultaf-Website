@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Dapur;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
 use App\Models\Menu;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -11,29 +10,25 @@ use Illuminate\View\View;
 
 class MenuAvailabilityController extends Controller
 {
-    // Daftar semua menu, dikelompokkan per kategori, khusus untuk toggle ketersediaan
-    public function index(Request $request): View
+        public function index(Request $request): View
     {
-        $categories = Category::orderBy('order')->get();
-        $activeCategory = $request->get('category', $categories->first()?->slug);
+        // Ambil semua menu dengan pagination
+        $menus = Menu::orderBy('nama_menu')->paginate(10);
 
-        $menus = Menu::with('category')
-            ->when($activeCategory, fn ($q) => $q->whereHas('category', fn ($q2) => $q2->where('slug', $activeCategory)))
-            ->orderBy('nama_makanan')
-            ->get();
+        // Statistik untuk header
+        $totalHabis = Menu::where('status_ketersediaan', 'habis')->count();
+        $totalTersedia = Menu::where('status_ketersediaan', 'tersedia')->count(); // <--- TAMBAHKAN BARIS INI
 
-        $totalHabis = Menu::where('habis', true)->count();
-
-        return view('dapur.menu.index', compact('categories', 'activeCategory', 'menus', 'totalHabis'));
+        return view('dapur.menu.index', compact('menus', 'totalHabis', 'totalTersedia'));
     }
 
-    // Dapur menandai menu tersedia / tidak tersedia (field 'habis' pada tabel menus)
     public function toggle(Menu $menu): RedirectResponse
     {
-        $menu->update(['habis' => ! $menu->habis]);
+        // Ubah status: jika 'tersedia' jadi 'habis', dan sebaliknya
+        $newStatus = $menu->status_ketersediaan === 'tersedia' ? 'habis' : 'tersedia';
+        
+        $menu->update(['status_ketersediaan' => $newStatus]);
 
-        $status = $menu->habis ? 'tidak tersedia' : 'tersedia';
-
-        return back()->with('success', "Menu \"{$menu->nama_makanan}\" ditandai {$status}.");
+        return back()->with('success', "Status menu '{$menu->nama_menu}' berhasil diubah menjadi {$newStatus}.");
     }
 }

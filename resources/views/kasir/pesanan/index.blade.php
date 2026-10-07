@@ -55,20 +55,27 @@
                     @forelse ($pesanan[$key] ?? [] as $transaksi)
                         <div class="bg-white rounded-xl border border-sultaf-border/70 p-4 shadow-sm">
                             <div class="flex items-center justify-between mb-2">
-                                <span class="font-serif text-lg font-bold text-sultaf-ink">#{{ substr($transaksi->kode_transaksi, -4) }}</span>
+                                {{-- DIUBAH: Menggunakan generate ID dari id_transaksi --}}
+                                <span class="font-serif text-lg font-bold text-sultaf-ink">
+                                    #{{ substr(str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT), -4) }}
+                                </span>
+                                {{-- DIUBAH: tgl_transaksi menjadi created_at --}}
                                 <span class="text-xs font-semibold px-2 py-1 rounded-full bg-sultaf-cream text-sultaf-muted">
-                                    {{ $transaksi->tgl_transaksi->diffForHumans(null, true) }}
+                                    {{ $transaksi->created_at->diffForHumans(null, true) }}
                                 </span>
                             </div>
 
                             <p class="text-xs text-sultaf-muted mb-2">
-                                {{ $transaksi->nomor_meja ? 'Table ' . $transaksi->nomor_meja : 'Takeaway' }}
-                                @if ($transaksi->user) • {{ $transaksi->user->name }} @endif
+                                {{ $transaksi->no_meja ? 'Table ' . $transaksi->no_meja : 'Takeaway' }}
+                                {{-- DIUBAH: name menjadi username --}}
+                                @if ($transaksi->user) • {{ $transaksi->user->username }} @endif
                             </p>
 
                             <div class="space-y-1 mb-3">
-                                @foreach ($transaksi->items as $item)
-                                    <p class="text-sm text-sultaf-ink/80">{{ $item->qty }}x {{ $item->menu->nama_makanan }}</p>
+                                {{-- DIUBAH: items menjadi detail_transaksi --}}
+                                @foreach ($transaksi->detail_transaksi as $item)
+                                    {{-- DIUBAH: qty menjadi jumlah, nama_makanan menjadi nama_menu --}}
+                                    <p class="text-sm text-sultaf-ink/80">{{ $item->jumlah }}x {{ $item->menu->nama_menu }}</p>
                                 @endforeach
                             </div>
 

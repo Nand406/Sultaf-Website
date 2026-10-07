@@ -2,40 +2,26 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Menu extends Model
+class Menu extends Model // <--- Kembalikan ke Model
 {
+    use HasFactory;
+
+    protected $table = 'menus';
+    protected $primaryKey = 'id_menu';
+    public $timestamps = true;
+
     protected $fillable = [
-        'category_id', 'nama_makanan', 'deskripsi', 'foto_makanan',
-        'harga_makanan', 'harga_modal', 'rating', 'spice_level', 'is_halal', 'habis',
+        'nama_menu', 
+        'harga', 
+        'foto_menu', 
+        'status_ketersediaan'
     ];
 
-    protected $casts = [
-        'harga_makanan' => 'decimal:2',
-        'harga_modal' => 'decimal:2',
-        'is_halal' => 'boolean',
-        'habis' => 'boolean',
-    ];
-
-    public function category()
+    public function detail_transaksis()
     {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function scopeTersedia($query)
-    {
-        return $query->where('habis', false);
-    }
-
-    public function getHargaFormatAttribute(): string
-    {
-        return 'Rp ' . number_format((float) $this->harga_makanan, 0, ',', '.');
-    }
-
-    // Keuntungan per unit menu (dipakai di grafik keuntungan Owner)
-    public function getKeuntunganPerUnitAttribute(): float
-    {
-        return (float) $this->harga_makanan - (float) $this->harga_modal;
+        return $this->hasMany(DetailTransaksi::class, 'id_menu', 'id_menu');
     }
 }

@@ -10,37 +10,59 @@ use Illuminate\View\View;
 class CartController extends Controller
 {
     // Tampilkan isi keranjang (Checkout Step 1: Review)
-    public function index(): View
+    public function add(Request $request)
     {
-        $cart = $this->getCart();
-        $menus = Menu::whereIn('id', array_keys($cart))->get()->keyBy('id');
+        // 1. Tangkap ID menggunakan id_menu dari form HTML
+        $id = $request->id_menu; 
+        $qty = $request->qty ?? 1;
 
-        $items = collect($cart)->map(function ($qty, $menuId) use ($menus) {
-            $menu = $menus->get($menuId);
-            if (! $menu) return null;
-            return [
-                'menu'     => $menu,
-                'qty'      => $qty,
-                'subtotal' => $qty * (float) $menu->harga_makanan,
-            ];
-        })->filter()->values();
+        // Jika ID kosong, kembalikan error
+        if (!$id) {
+            return back()->with('error', 'Gagal menambahkan: ID Menu tidak ditemukan.');
+        }
 
-        $subtotal = $items->sum('subtotal');
-        $tax      = round($subtotal * 0.10);
-        $total    = $subtotal + $tax;
+        $cart = session()->get('cart', []);
 
-        return view('checkout.review', compact('items', 'subtotal', 'tax', 'total'));
+        if (isset($cart[$id])) {
+            $cart[$id] += $qty;
+        } else {
+            $cart[$id] = $qty;
+        }
+
+        session()->put('cart', $cart);
+
+        return back()->with('success', 'Menu berhasil ditambahkan ke keranjang!');
     }
 
-    // Tambah menu ke keranjang — menerima qty dari modal (default 1 jika tidak ada)
-    public function add(Request $request, Menu $menu): RedirectResponse
+    public function index()
     {
-        $qty  = max(1, (int) $request->input('qty', 1));
-        $cart = $this->getCart();
-        $cart[$menu->id] = ($cart[$menu->id] ?? 0) + $qty;
-        session(['cart' => $cart]);
+        $cart = session()->get('cart', []);
+        $cartIds = array_keys($cart);
 
-        return back()->with('success', $menu->nama_makanan . ' (×' . $qty . ') ditambahkan ke keranjang.');
+        // 2. WAJIB MENGGUNAKAN id_menu DI SINI
+        $menus = \App\Models\Menu::whereIn('id_menu', $cartIds)->get()->keyBy('id_menu');
+
+        $items = collect();
+        $subtotal = 0;
+
+        foreach ($cart as $id => $qty) {
+            if ($menus->has($id)) {
+                $menu = $menus->get($id);
+                $itemSubtotal = $menu->harga * $qty;
+                $subtotal += $itemSubtotal;
+
+                $items->push([
+                    'menu' => $menu,
+                    'qty' => $qty,
+                    'subtotal' => $itemSubtotal
+                ]);
+            }
+        }
+
+        $tax = $subtotal * 0.10;
+        $total = $subtotal + $tax;
+
+        return view('checkout.review', compact('items', 'subtotal', 'tax', 'total'));
     }
 
     // Kurangi 1 dari item di keranjang

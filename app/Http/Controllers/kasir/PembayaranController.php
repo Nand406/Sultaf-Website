@@ -15,9 +15,9 @@ class PembayaranController extends Controller
 
     public function index(): View
     {
-        $menunggu = TransaksiPenjualan::with(['user', 'items.menu'])
+        $menunggu = TransaksiPenjualan::with(['user', 'detail_transaksi.menu'])
             ->where('status_pembayaran', 'menunggu')
-            ->oldest('tgl_transaksi')
+            ->oldest()
             ->get();
 
         $terverifikasiHariIni = TransaksiPenjualan::where('status_pembayaran', 'terverifikasi')
@@ -27,8 +27,6 @@ class PembayaranController extends Controller
         return view('kasir.pembayaran.index', compact('menunggu', 'terverifikasiHariIni'));
     }
 
-    // Kasir menyetujui pembayaran -> masuk antrian dapur + poin member ditambahkan
-    // otomatis via nomor HP yang dicatat saat checkout (kalau nomornya terdaftar sbg member)
     public function verify(TransaksiPenjualan $transaksi): RedirectResponse
     {
         $transaksi->update([
@@ -36,11 +34,16 @@ class PembayaranController extends Controller
             'status_pesanan'    => 'pending',
         ]);
 
+        // DIUBAH: Menggunakan no_telepon (pastikan kolom ini ada di database)
         $member = $this->memberPoints->awardFromTransaksi($transaksi, $transaksi->no_telepon);
 
-        $pesan = "Pembayaran #{$transaksi->kode_transaksi} berhasil diverifikasi & dikirim ke dapur.";
+        // DIUBAH: Menggunakan format ID baru, bukan kode_transaksi
+        $kodeTransaksi = '#SLT-' . str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT);
+        $pesan = "Pembayaran {$kodeTransaksi} berhasil diverifikasi & dikirim ke dapur.";
+        
         if ($member) {
-            $pesan .= " Poin member atas nama {$member->name} bertambah.";
+            // DIUBAH: Menggunakan username dari relasi user
+            $pesan .= " Poin member atas nama {$member->user->username} bertambah.";
         }
 
         return back()->with('success', $pesan);
@@ -58,6 +61,8 @@ class PembayaranController extends Controller
             'catatan'           => trim(($transaksi->catatan ?? '') . ' | Ditolak kasir: ' . ($request->alasan ?? '-')),
         ]);
 
-        return back()->with('success', "Pembayaran #{$transaksi->kode_transaksi} ditolak.");
+        // DIUBAH: Menggunakan format ID baru, bukan kode_transaksi
+        $kodeTransaksi = '#SLT-' . str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT);
+        return back()->with('success', "Pembayaran {$kodeTransaksi} ditolak.");
     }
 }

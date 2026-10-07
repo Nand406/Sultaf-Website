@@ -146,7 +146,8 @@ Route::middleware(['auth', 'role:admin,owner'])->prefix('admin')->name('admin.')
     Route::delete('/benefit/{benefit}', [BenefitController::class, 'destroy'])->name('benefit.destroy');
     Route::post('/benefit/{benefit}/toggle', [BenefitController::class, 'toggle'])->name('benefit.toggle');
 
-    Route::get('/promo', [PromoMessageController::class, 'index'])->name('promo.index');
+        Route::get('/promo', [PromoMessageController::class, 'index'])->name('promo.index');
+    Route::get('/promo/create', [PromoMessageController::class, 'create'])->name('promo.create');
     Route::post('/promo', [PromoMessageController::class, 'store'])->name('promo.store');
     Route::delete('/promo/{promo}', [PromoMessageController::class, 'destroy'])->name('promo.destroy');
 });

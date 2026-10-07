@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Member; // Tambahkan ini
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,39 +26,50 @@ class AuthController extends Controller
 
     public function login(Request $request): RedirectResponse
     {
+        // 1. Validasi menggunakan 'username'
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'username' => ['required', 'string'],
             'password' => ['required'],
         ]);
 
+        // 2. Coba login
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             return back()
-                ->withErrors(['email' => __('Invalid email or password.')])
-                ->onlyInput('email');
+                ->withErrors(['username' => __('Username atau password salah.')])
+                ->onlyInput('username');
         }
 
+        // 3. Regenerasi session untuk keamanan
         $request->session()->regenerate();
 
-        return redirect()->intended($this->redirectBasedOnRole(Auth::user()->role));
+        // 4. Ambil role user dan arahkan ke dashboard yang sesuai
+        $role = Auth::user()->role;
+        return redirect()->intended($this->redirectBasedOnRole($role));
     }
 
     public function register(Request $request): RedirectResponse
     {
+        // Sesuaikan validasi dengan kolom database baru (username & no_hp)
         $validated = $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'name'     => ['required', 'string', 'max:255'], // 'name' ini akan kita simpan sebagai username
+            'username' => ['required', 'string', 'max:255', 'unique:users,username'],
             'phone'    => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Buat User baru
         $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'phone'    => $validated['phone'] ?? null,
+            'username' => $validated['username'], // Gunakan username dari input
+            'no_hp'    => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
-            // Siapa pun yang mendaftar sendiri lewat form ini langsung jadi
-            // member — otomatis bisa mengumpulkan poin & lihat halaman Rewards.
-            'role'     => 'member',
+            'role'     => 'customer', // Default role untuk pendaftar baru
+        ]);
+
+        // Buat data Member untuk user ini (karena dia mendaftar sebagai customer)
+        Member::create([
+            'id_user' => $user->id_user,
+            'total_poin' => 0,
+            'tanggal_daftar' => now(),
         ]);
 
         Auth::login($user);

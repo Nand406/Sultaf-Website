@@ -35,12 +35,12 @@
                                     <div class="w-full h-full flex items-center justify-center text-2xl">🍽️</div>
                                 @endif
                                 <span class="absolute top-1.5 right-1.5 bg-white/95 text-[10px] font-bold text-sultaf-maroon px-1.5 py-0.5 rounded">
-                                    Rp {{ number_format($menu->harga_makanan / 1000, 0) }}k
+                                    Rp {{ number_format($menu->harga / 1000, 0) }}k
                                 </span>
                             </div>
                             <div class="p-2.5">
                                 <p class="text-sm font-semibold text-sultaf-ink leading-tight group-hover:text-sultaf-maroon">
-                                    {{ $menu->nama_makanan }}
+                                    {{ $menu->nama_menu }}
                                 </p>
                             </div>
                         </button>
@@ -67,8 +67,8 @@
                 @forelse ($cartItems as $item)
                     <div class="flex items-center gap-3">
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-semibold text-sultaf-ink truncate">{{ $item['menu']->nama_makanan }}</p>
-                            <p class="text-xs text-sultaf-muted">Rp {{ number_format($item['menu']->harga_makanan, 0, ',', '.') }}</p>
+                            <p class="text-sm font-semibold text-sultaf-ink truncate">{{ $item['menu']->nama_menu }}</p>
+                            <p class="text-xs text-sultaf-muted">Rp {{ number_format($item['menu']->harga, 0, ',', '.') }}</p>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
                             <form method="POST" action="{{ route('kasir.pos.decrease', $item['menu']) }}">
