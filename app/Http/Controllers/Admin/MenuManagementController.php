@@ -25,7 +25,7 @@ class MenuManagementController extends Controller
         return view('admin.menu.create', compact('categories'));
     }
 
-    public function store(Request $request): RedirectResponse
+        public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'nama_menu' => ['required', 'string', 'max:255'],
@@ -34,9 +34,17 @@ class MenuManagementController extends Controller
             'status_ketersediaan' => ['required', 'in:tersedia,habis'],
         ]);
 
+        // --- BAGIAN YANG DIUBAH ---
         if ($request->hasFile('foto_menu')) {
-            $validated['foto_menu'] = $request->file('foto_menu')->store('menu-images', 'public');
+            $file = $request->file('foto_menu');
+            // Buat nama unik untuk file
+            $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+            // Pindahkan langsung ke folder public/menu-images
+            $file->move(public_path('menu-images'), $filename);
+            
+            $validated['foto_menu'] = 'menu-images/' . $filename;
         }
+        // --------------------------
 
         Menu::create($validated);
 
@@ -50,7 +58,7 @@ class MenuManagementController extends Controller
         return view('admin.menu.edit', compact('menu', 'categories'));
     }
 
-    public function update(Request $request, Menu $menu): RedirectResponse
+        public function update(Request $request, Menu $menu): RedirectResponse
     {
         $validated = $request->validate([
             'nama_menu' => ['required', 'string', 'max:255'],
@@ -59,9 +67,20 @@ class MenuManagementController extends Controller
             'status_ketersediaan' => ['required', 'in:tersedia,habis'],
         ]);
 
+        // --- BAGIAN YANG DIUBAH ---
         if ($request->hasFile('foto_menu')) {
-            $validated['foto_menu'] = $request->file('foto_menu')->store('menu-images', 'public');
+            // Hapus foto lama jika ada
+            if ($menu->foto_menu && file_exists(public_path($menu->foto_menu))) {
+                unlink(public_path($menu->foto_menu));
+            }
+
+            $file = $request->file('foto_menu');
+            $filename = time() . '_' . str_replace(' ', '_', $file->getClientOriginalName());
+            $file->move(public_path('menu-images'), $filename);
+            
+            $validated['foto_menu'] = 'menu-images/' . $filename;
         }
+        // --------------------------
 
         $menu->update($validated);
 
