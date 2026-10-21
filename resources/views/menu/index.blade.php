@@ -82,7 +82,7 @@
             <div class="bg-white rounded-2xl overflow-hidden border border-sultaf-border/70 shadow-sm flex flex-col {{ $menu->status_ketersediaan == 'Habis' ? 'grayscale opacity-75' : 'hover:shadow-md transition-shadow' }}">
                 <div class="relative h-44">
                     @if ($menu->foto_menu)
-                        <img src="{{ asset('storage/'.$menu->foto_menu) }}" alt="{{ __($menu->nama_menu) }}"
+                        <img src="{{ asset($menu->foto_menu) }}" alt="{{ __($menu->nama_menu) }}"
                              class="w-full h-full object-cover">
                     @else
                         <div class="w-full h-full bg-sultaf-cream-dark flex items-center justify-center text-sultaf-muted text-sm">

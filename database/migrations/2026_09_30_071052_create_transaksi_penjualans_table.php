@@ -9,32 +9,44 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('transaksi_penjualans', function (Blueprint $table) {
+            // Primary Key sesuai ERD
             $table->id('id_transaksi');
-            // Nullable karena customer mungkin tidak login (guest)
+            
+            // Foreign Keys
+            // Dibuat nullable() karena ada transaksi "Guest" yang tidak memiliki id_user
             $table->unsignedBigInteger('id_user')->nullable(); 
+            
+            // Dibuat nullable() karena tidak semua transaksi menggunakan promo
             $table->unsignedBigInteger('id_promo')->nullable(); 
             
-            $table->string('tipe_pesanan'); // misal: 'dine_in', 'take_away'
-            $table->string('status_pesanan'); // misal: 'pending', 'proses', 'selesai'
-            $table->string('metode_pembayaran'); // misal: 'dana', 'cash', 'qris'
-            $table->string('status_pembayaran'); // misal: 'menunggu', 'lunas'
+            // Atribut sesuai ER Diagram
+            $table->string('tipe_pesanan'); // Contoh: Dine In, Take Away
+            $table->string('status_pesanan')->default('Pending'); // Contoh: Pending, Selesai
+            $table->string('metode_pembayaran'); // Contoh: Tunai, E-Wallet
+            $table->string('diverifikasi_oleh')->nullable(); // <-- INI YANG MEMBUAT ERROR SEBELUMNYA
+            $table->string('no_meja')->nullable(); // Nullable untuk Take Away
+            $table->string('status_pembayaran')->default('Belum Bayar'); // Contoh: Lunas, Belum Bayar
             
-            // Perhatikan: Di ERD tertulis 'total_bayar', tapi di error sebelumnya 'total_harga'.
-            // Saya gunakan 'total_bayar' sesuai ERD. Anda bisa menyesuaikannya.
-            $table->integer('total_bayar'); 
-            $table->integer('uang_bayar')->nullable();
-            $table->string('no_meja')->nullable(); // Nullable jika take_away
-            $table->integer('diskon')->default(0);
+            // Tipe data decimal untuk uang (15 digit total, 2 angka di belakang koma)
+            $table->decimal('total_bayar', 15, 2)->default(0);
+            $table->decimal('uang_bayar', 15, 2)->default(0);
+            $table->decimal('diskon', 15, 2)->default(0);
+            $table->decimal('total_harga', 15, 2)->default(0);
             
             $table->timestamps();
 
+            // Relasi ke tabel users
+            // Pastikan tabel users sudah dimigrasi sebelum tabel ini
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('set null');
+            
+            // Relasi ke tabel promos
+            // Pastikan tabel promos sudah dimigrasi sebelum tabel ini
             $table->foreign('id_promo')->references('id_promo')->on('promos')->onDelete('set null');
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('transaksi_penjualans');
+        Schema::dropIfExists('transaksi_penjualan');
     }
 };

@@ -1,7 +1,8 @@
 <x-layouts.admin title="Kirim Notifikasi - Admin Sultaf" pageTitle="Kirim Notifikasi">
 
     @if (session('success'))
-        <div class="mb-6 bg-sultaf-success-soft border border-sultaf-success/20 text-sultaf-success text-sm rounded-xl px-4 py-3">
+        <div
+            class="mb-6 bg-sultaf-success-soft border border-sultaf-success/20 text-sultaf-success text-sm rounded-xl px-4 py-3">
             ✓ {{ session('success') }}
         </div>
     @endif
@@ -11,7 +12,7 @@
             Kirim notifikasi ke member atau customer. Notifikasi akan muncul di halaman mereka.
         </p>
         <a href="{{ route('admin.promo.create') }}"
-           class="bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white text-sm font-semibold rounded-xl px-5 py-2.5 transition-colors shrink-0">
+            class="bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white text-sm font-semibold rounded-xl px-5 py-2.5 transition-colors shrink-0">
             + Kirim Notifikasi
         </a>
     </div>
@@ -33,19 +34,23 @@
                         <td class="px-5 py-3 font-semibold text-sultaf-ink">{{ $notif->judul }}</td>
                         <td class="px-5 py-3 text-sultaf-muted">{{ \Str::limit($notif->id_pesan, 50) }}</td>
                         <td class="px-5 py-3 text-sultaf-ink">{{ $notif->user->username ?? 'N/A' }}</td>
-                        <td class="px-5 py-3 text-sultaf-muted">{{ $notif->created_at->format('d M Y H:i') }}</td>
+                        <td class="px-5 py-3 text-sultaf-muted">
+                            {{ $notif->created_at ? $notif->created_at->format('d M Y H:i') : '-' }}
+                        </td>
                         <td class="px-5 py-3 text-right">
                             <form method="POST" action="{{ route('admin.promo.destroy', $notif) }}"
-                                  onsubmit="return confirm('Hapus notifikasi ini?');">
+                                onsubmit="return confirm('Hapus notifikasi ini?');">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-sultaf-danger hover:underline text-sm font-medium">Hapus</button>
+                                <button type="submit"
+                                    class="text-sultaf-danger hover:underline text-sm font-medium">Hapus</button>
                             </form>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-5 py-12 text-center text-sultaf-muted">Belum ada notifikasi yang dikirim.</td>
+                        <td colspan="5" class="px-5 py-12 text-center text-sultaf-muted">Belum ada notifikasi yang dikirim.
+                        </td>
                     </tr>
                 @endforelse
             </tbody>

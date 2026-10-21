@@ -36,7 +36,7 @@
                         <td class="px-5 py-3">
                             <div class="flex items-center gap-3">
                                 @if ($menu->foto_menu)
-                                    <img src="{{ asset('storage/' . $menu->foto_menu) }}" alt="{{ $menu->nama_menu }}" 
+                                    <img src="{{ asset($menu->foto_menu) }}" alt="{{ $menu->nama_menu }}" 
                                          class="w-10 h-10 rounded-lg object-cover border border-sultaf-border">
                                 @else
                                     <div class="w-10 h-10 rounded-lg bg-sultaf-cream flex items-center justify-center text-sultaf-muted text-xs">

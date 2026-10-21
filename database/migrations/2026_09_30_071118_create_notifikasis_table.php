@@ -10,12 +10,17 @@ return new class extends Migration
     {
         Schema::create('notifikasis', function (Blueprint $table) {
             $table->id('id_notifikasi');
-            $table->unsignedBigInteger('id_user');
+            
+            // --- TAMBAHKAN BARIS INI ---
+            $table->unsignedBigInteger('id_user'); 
+            // ---------------------------
+            
             $table->unsignedBigInteger('id_member')->nullable(); // Bisa null jika untuk user biasa
-            $table->integer('id_pesan'); // Atau bisa juga integer, sesuaikan kebutuhan
+            $table->string('isi_pesan'); 
             $table->string('judul');
             $table->timestamps();
 
+            // Baru kemudian buat foreign key-nya
             $table->foreign('id_user')->references('id_user')->on('users')->onDelete('cascade');
             $table->foreign('id_member')->references('id_member')->on('members')->onDelete('cascade');
         });
@@ -23,6 +28,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('notifikasis');
+        Schema::dropIfExists('notifikasi');
     }
 };
