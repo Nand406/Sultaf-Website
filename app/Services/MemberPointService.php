@@ -2,58 +2,51 @@
 
 namespace App\Services;
 
+use App\Models\Member;
 use App\Models\TransaksiPenjualan;
 use App\Models\User;
 
 class MemberPointService
 {
-    // 1 poin didapat setiap kelipatan Rp 10.000 dari total transaksi
-    protected const RUPIAH_PER_POIN = 10000;
+    protected const RUPIAH_PER_POIN = 1000;
 
-    public function awardFromTransaksi(TransaksiPenjualan $transaksi, ?string $noTelepon): ?User
+    // Parameter kedua (noTelepon) dihapus karena kita tidak membutuhkannya lagi
+    public function awardFromTransaksi(TransaksiPenjualan $transaksi): ?User
     {
-        if (! $noTelepon) {
+        // Jika transaksi tidak punya id_user (misal walk-in tanpa no HP), batalkan.
+        if (! $transaksi->id_user) {
             return null;
         }
 
-        $normalized = $this->normalizePhone($noTelepon);
+        // Cari user berdasarkan id_user
+        $user = User::find($transaksi->id_user);
 
-        $member = User::where('role', 'member')
-            ->get()
-            ->first(fn ($u) => $this->normalizePhone((string) $u->phone) === $normalized);
-
-        if (! $member) {
+        if (! $user) {
             return null;
         }
 
-        $poinDidapat = self::calculatePoints((float) $transaksi->total_harga);
+        // Cari data member. Jika belum ada, buatkan otomatis.
+        $member = $user->member;
+        if (!$member) {
+            $member = Member::create([
+                'id_user' => $user->id_user,
+                'total_poin' => 0,
+                'tanggal_daftar' => now(),
+            ]);
+        }
+
+        // Hitung poin (total_bayar / 1000)
+        $poinDidapat = self::calculatePoints((float) $transaksi->total_bayar);
 
         if ($poinDidapat > 0) {
-            $member->increment('points', $poinDidapat);
+            $member->increment('total_poin', $poinDidapat);
         }
 
-        if (! $transaksi->user_id) {
-            $transaksi->update(['user_id' => $member->id]);
-        }
-
-        return $member;
+        return $user;
     }
 
-    // Dipakai di RewardsController untuk menampilkan riwayat poin per transaksi,
-    // dan di tempat lain yang butuh hitung poin dari nominal Rupiah.
     public static function calculatePoints(float $amount): int
     {
         return intdiv((int) $amount, self::RUPIAH_PER_POIN);
-    }
-
-    protected function normalizePhone(string $phone): string
-    {
-        $digits = preg_replace('/\D/', '', $phone);
-
-        if (str_starts_with($digits, '62')) {
-            $digits = '0' . substr($digits, 2);
-        }
-
-        return $digits;
     }
 }

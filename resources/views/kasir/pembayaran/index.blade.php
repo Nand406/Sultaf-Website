@@ -15,7 +15,6 @@
             </div>
             <div class="pt-6 sm:pt-0 sm:pl-6">
                 <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">Total Value</p>
-                {{-- DIUBAH: 'total_harga' menjadi 'total_bayar' --}}
                 <p class="font-serif text-3xl font-bold">Rp {{ number_format($menunggu->sum('total_bayar'), 0, ',', '.') }}</p>
             </div>
             <div class="pt-6 sm:pt-0 sm:pl-6 flex items-center gap-2">
@@ -25,37 +24,17 @@
         </div>
     </div>
 
-    {{-- ===================== DAFTAR TRANSAKSI MENUNGGU ===================== --}}
+    {{-- ===================== DAFTAR TRANSAKSI ===================== --}}
     <div class="space-y-4">
         @forelse ($menunggu as $transaksi)
             <div class="staff-card overflow-hidden">
                 <div class="p-5 flex flex-col lg:flex-row lg:items-start gap-5">
-
-                    <div class="w-full lg:w-40 shrink-0">
-                        @if ($transaksi->bukti_pembayaran)
-                            <a href="{{ asset('storage/'.$transaksi->bukti_pembayaran) }}" target="_blank"
-                               class="block rounded-xl overflow-hidden border border-sultaf-border h-32 lg:h-40">
-                                <img src="{{ asset('storage/'.$transaksi->bukti_pembayaran) }}"
-                                     class="w-full h-full object-cover" alt="Bukti pembayaran">
-                            </a>
-                            <p class="text-[11px] text-center text-sultaf-muted mt-1">Klik untuk perbesar</p>
-                        @else
-                            <div class="rounded-xl border border-dashed border-sultaf-border h-32 lg:h-40 flex items-center justify-center text-sultaf-muted text-xs text-center px-2 bg-sultaf-cream/40">
-                                Tanpa bukti<br>(Cash / QRIS di tempat)
-                            </div>
-                        @endif
-                    </div>
-
+                    
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2 mb-2">
                             <h3 class="font-semibold text-sultaf-ink">
-                                {{-- DIUBAH: 'name' menjadi 'username' --}}
                                 {{ $transaksi->nama_pelanggan ?? $transaksi->user->username ?? 'Pelanggan' }}
                             </h3>
-                            @if ($transaksi->no_telepon)
-                                <span class="text-xs font-medium text-sultaf-muted">{{ $transaksi->no_telepon }}</span>
-                            @endif
-                            {{-- DIUBAH: 'nomor_meja' menjadi 'no_meja' --}}
                             @if ($transaksi->no_meja)
                                 <span class="text-xs font-semibold bg-sultaf-maroon/10 text-sultaf-maroon px-2 py-0.5 rounded-full">
                                     Table {{ str_pad($transaksi->no_meja, 2, '0', STR_PAD_LEFT) }}
@@ -85,31 +64,19 @@
                     </div>
 
                     <div class="flex lg:flex-col gap-2 shrink-0 w-full lg:w-44">
-                        <form method="POST" action="{{ route('kasir.pembayaran.verify', $transaksi) }}" class="flex-1 lg:flex-none">
-                            @csrf
-                            <button type="submit"
-                                    class="w-full bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white text-sm font-semibold rounded-xl py-2.5 flex items-center justify-center gap-1.5 transition-colors">
-                                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
-                                Verify &amp; Send
-                            </button>
-                        </form>
-
-                        <button type="button" onclick="document.getElementById('reject-{{ $transaksi->id_transaksi }}').classList.toggle('hidden')"
-                                class="flex-1 lg:flex-none border border-sultaf-border text-sultaf-muted hover:bg-sultaf-cream text-sm font-semibold rounded-xl py-2.5 transition-colors">
-                            Reject
+                        {{-- TOMBOL DIUBAH: Mengirim daftar menu ke Modal menggunakan addslashes agar aman dari tanda kutip --}}
+                        <button type="button" 
+                                onclick="openPaymentModal(
+                                    {{ $transaksi->id_transaksi }}, 
+                                    {{ $transaksi->total_bayar }}, 
+                                    '{{ addslashes($transaksi->nama_pelanggan ?? $transaksi->user->username ?? 'Pelanggan') }}',
+                                    '{{ addslashes($transaksi->detail_transaksi->map(fn ($i) => "{$i->jumlah}x {$i->menu->nama_menu}")->join(', ')) }}'
+                                )"
+                                class="w-full bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white text-sm font-semibold rounded-xl py-2.5 flex items-center justify-center gap-1.5 transition-colors">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+                            Verify & Send
                         </button>
                     </div>
-                </div>
-
-                <div id="reject-{{ $transaksi->id_transaksi }}" class="hidden border-t border-sultaf-border bg-sultaf-cream/50 p-4">
-                    <form method="POST" action="{{ route('kasir.pembayaran.reject', $transaksi) }}" class="flex gap-2">
-                        @csrf
-                        <input type="text" name="alasan" placeholder="Alasan penolakan (opsional)"
-                               class="flex-1 border border-sultaf-border rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:border-sultaf-maroon">
-                        <button type="submit" class="bg-sultaf-danger hover:opacity-90 text-white text-sm font-semibold rounded-lg px-4">
-                            Konfirmasi Tolak
-                        </button>
-                    </form>
                 </div>
             </div>
         @empty
@@ -119,4 +86,119 @@
             </div>
         @endforelse
     </div>
+
+    {{-- ===================== MODAL PEMBAYARAN ===================== --}}
+    <div id="paymentModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md mx-4 shadow-2xl transform scale-95 transition-transform duration-300" id="paymentModalContent">
+            
+            <div class="flex justify-between items-center mb-4 border-b border-sultaf-border pb-3">
+                <h3 class="font-serif text-xl font-bold text-sultaf-ink">Konfirmasi Pembayaran</h3>
+                <button onclick="closePaymentModal()" class="text-sultaf-muted hover:text-sultaf-danger">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="paymentForm" method="POST" action="">
+                @csrf
+                
+                <div class="mb-3">
+                    <p class="text-sm text-sultaf-muted">Pelanggan</p>
+                    <p id="modalCustomerName" class="font-semibold text-sultaf-ink"></p>
+                </div>
+
+                {{-- TAMBAHAN: Rincian Pesanan --}}
+                <div class="mb-4 bg-sultaf-cream/50 p-3 rounded-lg border border-sultaf-border">
+                    <p class="text-xs text-sultaf-muted mb-1">Pesanan:</p>
+                    <p id="modalOrderItems" class="text-sm font-medium text-sultaf-ink leading-relaxed"></p>
+                </div>
+
+                <div class="bg-sultaf-cream rounded-xl p-4 mb-4 flex justify-between items-center">
+                    <span class="text-sm font-semibold text-sultaf-ink">Total Tagihan</span>
+                    <span id="modalTotalBill" class="font-serif text-2xl font-bold text-sultaf-maroon"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-sultaf-ink mb-1.5">Uang Diterima (Rp)</label>
+                    <input type="number" name="uang_bayar" id="inputUangBayar" required min="0"
+                           class="w-full border border-sultaf-border rounded-xl px-4 py-3 text-lg font-bold text-sultaf-ink focus:outline-none focus:border-sultaf-maroon"
+                           placeholder="Masukkan nominal uang...">
+                </div>
+
+                <div class="bg-sultaf-success-soft border border-sultaf-success/20 rounded-xl p-4 mb-6 flex justify-between items-center">
+                    <span class="text-sm font-semibold text-sultaf-success">Kembalian</span>
+                    <span id="modalKembalian" class="font-serif text-2xl font-bold text-sultaf-success">Rp 0</span>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="closePaymentModal()" class="flex-1 py-3 rounded-xl border border-sultaf-border text-sultaf-ink font-semibold hover:bg-sultaf-cream">Batal</button>
+                    <button type="submit" class="flex-1 py-3 rounded-xl bg-sultaf-maroon text-white font-semibold hover:bg-sultaf-maroon-dark">Konfirmasi & Cetak</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- ===================== JAVASCRIPT MODAL & KEMBALIAN ===================== --}}
+    <script>
+        const modal = document.getElementById('paymentModal');
+        const modalContent = document.getElementById('paymentModalContent');
+        const form = document.getElementById('paymentForm');
+        const inputUang = document.getElementById('inputUangBayar');
+        const textTotal = document.getElementById('modalTotalBill');
+        const textKembalian = document.getElementById('modalKembalian');
+        
+        let currentTotal = 0;
+
+        // TAMBAHAN parameter itemList
+        function openPaymentModal(idTransaksi, total, namaPelanggan, itemList) {
+            currentTotal = total;
+            
+            // Set data ke dalam modal
+            document.getElementById('modalCustomerName').innerText = namaPelanggan;
+            document.getElementById('modalOrderItems').innerText = itemList; // Tampilkan list menu
+            textTotal.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(total);
+            
+            // Reset inputan
+            inputUang.value = '';
+            textKembalian.innerText = 'Rp 0';
+            
+            // Set Action URL Form menuju route verify
+            form.action = `/kasir/pembayaran/${idTransaksi}/verify`;
+
+            // Tampilkan Modal
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+            
+            // Fokus otomatis ke inputan uang
+            setTimeout(() => inputUang.focus(), 300);
+        }
+
+        function closePaymentModal() {
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Hitung Kembalian secara otomatis saat kasir mengetik
+        inputUang.addEventListener('input', function() {
+            let uangBayar = parseFloat(this.value) || 0;
+            let kembalian = uangBayar - currentTotal;
+
+            if (kembalian >= 0) {
+                textKembalian.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(kembalian);
+                textKembalian.classList.remove('text-sultaf-danger');
+                textKembalian.classList.add('text-sultaf-success');
+            } else {
+                textKembalian.innerText = 'Uang Kurang!';
+                textKembalian.classList.remove('text-sultaf-success');
+                textKembalian.classList.add('text-sultaf-danger');
+            }
+        });
+    </script>
 </x-layouts.kasir>

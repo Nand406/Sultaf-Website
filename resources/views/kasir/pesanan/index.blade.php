@@ -1,4 +1,4 @@
-<x-layouts.kasir title="Status Pesanan - Kasir" pageTitle="Order Status Board">
+<x-layouts.kasir title="Status Pesanan - Kasir" pageTitle="Status Pesanan">
 
     @if (session('success'))
         <div class="mb-6 bg-sultaf-success-soft border border-sultaf-success/20 text-sultaf-success text-sm rounded-xl px-4 py-3">
@@ -42,9 +42,6 @@
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full {{ $col['dot'] }}"></span>
                         <span class="font-semibold text-sultaf-ink">{{ $col['label'] }}</span>
-                        @if (! $col['actionable'])
-                            <span class="text-[10px] font-semibold uppercase text-sultaf-muted bg-white rounded-full px-2 py-0.5">Lihat saja</span>
-                        @endif
                     </div>
                     <span class="text-xs font-semibold bg-white rounded-full px-2.5 py-1 text-sultaf-muted">
                         {{ isset($pesanan[$key]) ? $pesanan[$key]->count() : 0 }} Orders

@@ -12,15 +12,15 @@ class PesananController extends Controller
 {
     public function index(): View
     {
-        // Kasir bisa MELIHAT seluruh alur (pending & cooking termasuk),
-        // tapi hanya boleh MENGUBAH status ready->diantar dan diantar->selesai.
-                $pesanan = TransaksiPenjualan::with(['user', 'detail_transaksi.menu']) // Ubah 'items.menu' menjadi 'detail_transaksi.menu'
+        // Ambil pesanan yang sudah diverifikasi tapi belum selesai
+        $pesanan = TransaksiPenjualan::with(['user', 'detail_transaksi.menu'])
             ->where('status_pembayaran', 'terverifikasi')
             ->whereIn('status_pesanan', ['pending', 'cooking', 'ready', 'diantar'])
-            ->oldest() // Ubah 'oldest('tgl_transaksi')' menjadi 'oldest()' saja
+            ->oldest()
             ->get()
             ->groupBy('status_pesanan');
 
+        // Hitung pesanan yang selesai hari ini
         $selesaiHariIni = TransaksiPenjualan::where('status_pesanan', 'selesai')
             ->whereDate('updated_at', now())
             ->count();
@@ -28,27 +28,38 @@ class PesananController extends Controller
         return view('kasir.pesanan.index', compact('pesanan', 'selesaiHariIni'));
     }
 
-    // Kasir HANYA boleh mengubah ke 'diantar' atau 'selesai'
     public function updateStatus(Request $request, TransaksiPenjualan $transaksi): RedirectResponse
     {
         $request->validate([
-            'status' => ['required', 'in:diantar,selesai'],
+            'status' => ['required', 'in:pending,cooking,ready,diantar,selesai'],
         ]);
 
+        // Transisi status yang valid
         $validTransitions = [
-            'ready'   => 'diantar',
-            'diantar' => 'selesai',
+            'pending' => ['cooking'],
+            'cooking' => ['ready'],
+            'ready'   => ['diantar', 'selesai'], // Bisa langsung selesai jika takeaway
+            'diantar' => ['selesai'],
         ];
 
-        if (($validTransitions[$transaksi->status_pesanan] ?? null) !== $request->status) {
+        // Cek apakah status baru diizinkan dari status saat ini
+        $allowed = $validTransitions[$transaksi->status_pesanan] ?? [];
+        if (!in_array($request->status, $allowed)) {
             return back()->with('error', 'Perubahan status tidak valid untuk pesanan ini.');
         }
 
-        $transaksi->updateStatusPesanan($request->status);
+        // Update status pesanan
+        $transaksi->update(['status_pesanan' => $request->status]);
 
-        $pesan = $request->status === 'diantar'
-            ? "Pesanan #{$transaksi->kode_transaksi} sedang diantar."
-            : "Pesanan #{$transaksi->kode_transaksi} telah selesai.";
+        $kodeTransaksi = '#SLT-' . str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT);
+        
+        $pesan = match($request->status) {
+            'cooking' => "Pesanan {$kodeTransaksi} mulai dimasak.",
+            'ready'   => "Pesanan {$kodeTransaksi} selesai dimasak, siap diantar.",
+            'diantar' => "Pesanan {$kodeTransaksi} sedang diantar ke meja.",
+            'selesai' => "Pesanan {$kodeTransaksi} telah diselesaikan.",
+            default   => "Status pesanan {$kodeTransaksi} diperbarui.",
+        };
 
         return back()->with('success', $pesan);
     }

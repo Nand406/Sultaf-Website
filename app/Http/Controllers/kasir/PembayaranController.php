@@ -11,12 +11,15 @@ use Illuminate\View\View;
 
 class PembayaranController extends Controller
 {
-    public function __construct(protected MemberPointService $memberPoints) {}
+    public function __construct(protected MemberPointService $memberPoints)
+    {
+    }
 
     public function index(): View
     {
         $menunggu = TransaksiPenjualan::with(['user', 'detail_transaksi.menu'])
             ->where('status_pembayaran', 'menunggu')
+            ->where('metode_pembayaran', 'cash') // <--- TAMBAHKAN INI: Hanya tampilkan Cash
             ->oldest()
             ->get();
 
@@ -27,26 +30,32 @@ class PembayaranController extends Controller
         return view('kasir.pembayaran.index', compact('menunggu', 'terverifikasiHariIni'));
     }
 
-    public function verify(TransaksiPenjualan $transaksi): RedirectResponse
+    public function verify(Request $request, TransaksiPenjualan $transaksi): RedirectResponse
     {
+        $request->validate([
+            'uang_bayar' => ['required', 'numeric', 'min:' . $transaksi->total_bayar],
+        ]);
+
         $transaksi->update([
             'status_pembayaran' => 'terverifikasi',
             'status_pesanan'    => 'pending',
+            'uang_bayar'        => $request->uang_bayar, 
         ]);
 
-        // DIUBAH: Menggunakan no_telepon (pastikan kolom ini ada di database)
-        $member = $this->memberPoints->awardFromTransaksi($transaksi, $transaksi->no_telepon);
-
-        // DIUBAH: Menggunakan format ID baru, bukan kode_transaksi
+        $member = $this->memberPoints->awardFromTransaksi($transaksi);
         $kodeTransaksi = '#SLT-' . str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT);
-        $pesan = "Pembayaran {$kodeTransaksi} berhasil diverifikasi & dikirim ke dapur.";
-        
+        $pesan = "Pembayaran {$kodeTransaksi} berhasil diverifikasi.";
         if ($member) {
-            // DIUBAH: Menggunakan username dari relasi user
-            $pesan .= " Poin member atas nama {$member->user->username} bertambah.";
+            $pesan .= " Poin member atas nama {$member->username} bertambah.";
         }
 
-        return back()->with('success', $pesan);
+        return redirect()->route('kasir.pembayaran.receipt', $transaksi)->with('success', $pesan);
+    }
+
+    public function receipt(TransaksiPenjualan $transaksi): View
+    {
+        $transaksi->load(['detail_transaksi.menu', 'user']);
+        return view('kasir.pembayaran.receipt', compact('transaksi'));
     }
 
     public function reject(Request $request, TransaksiPenjualan $transaksi): RedirectResponse
@@ -57,11 +66,10 @@ class PembayaranController extends Controller
 
         $transaksi->update([
             'status_pembayaran' => 'ditolak',
-            'status_pesanan'    => 'dibatalkan',
-            'catatan'           => trim(($transaksi->catatan ?? '') . ' | Ditolak kasir: ' . ($request->alasan ?? '-')),
+            'status_pesanan' => 'dibatalkan',
+            'catatan' => trim(($transaksi->catatan ?? '') . ' | Ditolak kasir: ' . ($request->alasan ?? '-')),
         ]);
 
-        // DIUBAH: Menggunakan format ID baru, bukan kode_transaksi
         $kodeTransaksi = '#SLT-' . str_pad($transaksi->id_transaksi, 5, '0', STR_PAD_LEFT);
         return back()->with('success', "Pembayaran {$kodeTransaksi} ditolak.");
     }

@@ -1,5 +1,4 @@
-<x-layouts.owner title="{{ __('Sales & Financial Report') }} - Owner Sultaf" pageTitle="{{ __('Sales & Financial Report') }}">
-
+<x-layouts.owner title="Sales & Financial Report - Owner Sultaf" pageTitle="Sales & Financial Report">
     {{-- ===================== FILTER TANGGAL ===================== --}}
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div class="flex flex-wrap gap-2">

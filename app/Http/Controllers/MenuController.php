@@ -8,12 +8,18 @@ use Illuminate\View\View;
 class MenuController extends Controller
 {
     // Use Case: Lihat Menu — getAllMenu(), bisa difilter per kategori
-    public function index()
-{
-    // Mengambil semua data menu dari database
-    $menus = Menu::all();
+        public function index(Request $request): View
+    {
+        // Ambil parameter 'category' dari URL
+        $category = $request->query('category');
 
-    // Mengirim data menu ke tampilan halaman (view)
-    return view('menu.index', compact('menus'));
-}
+        // Query menu berdasarkan kategori yang dipilih
+        $menus = Menu::where('status_ketersediaan', 'tersedia')
+            ->when($category, function ($query, $category) {
+                return $query->where('kategori', $category);
+            })
+            ->get();
+
+        return view('menu.index', compact('menus', 'category'));
+    }
 }

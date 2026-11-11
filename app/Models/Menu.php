@@ -13,8 +13,9 @@ class Menu extends Model // <--- Kembalikan ke Model
     protected $primaryKey = 'id_menu';
     public $timestamps = true;
 
-    protected $fillable = [
+        protected $fillable = [
         'nama_menu', 
+        'kategori', // <--- Tambahkan ini
         'harga', 
         'foto_menu', 
         'status_ketersediaan'

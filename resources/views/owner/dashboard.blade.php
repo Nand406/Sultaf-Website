@@ -1,11 +1,13 @@
-<x-layouts.owner title="{{ __('Dashboard') }} - Owner Sultaf" pageTitle="{{ __('Admin Overview') }}">
+<x-layouts.owner title="{{ __('Owner Dashboard') }} - Sultaf" pageTitle="{{ __('Owner Dashboard') }}">
 
     {{-- ===================== HERO BAND ===================== --}}
     <div class="bg-sultaf-maroon-dark bg-sultaf-pattern-dark rounded-2xl p-6 lg:p-8 mb-6 text-white">
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 divide-x divide-white/10">
+        {{-- DIUBAH: Grid menjadi 4 kolom --}}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 divide-x divide-white/10">
             <div class="lg:col-span-1">
                 <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">{{ __("Today's Revenue") }}</p>
-                <p class="font-serif text-3xl font-bold">Rp {{ number_format($revenueToday / 1000000, 1) }}M</p>
+                {{-- DIUBAH: Menghapus format / 1000000 dan M --}}
+                <p class="font-serif text-3xl font-bold">Rp {{ number_format($revenueToday, 0, ',', '.') }}</p>
                 <p class="text-xs mt-1.5 flex items-center gap-1 {{ $revenueGrowth >= 0 ? 'text-emerald-300' : 'text-red-300' }}">
                     <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         @if ($revenueGrowth >= 0) <path d="M18 15l-6-6-6 6"/> @else <path d="M6 9l6 6 6-6"/> @endif
@@ -15,7 +17,8 @@
             </div>
             <div class="lg:col-span-1 pl-6 lg:pl-8">
                 <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">{{ __("Today's Profit") }}</p>
-                <p class="font-serif text-3xl font-bold text-sultaf-gold-light">Rp {{ number_format($profitToday / 1000000, 1) }}M</p>
+                {{-- DIUBAH: Menghapus format / 1000000 dan M --}}
+                <p class="font-serif text-3xl font-bold text-sultaf-gold-light">Rp {{ number_format($profitToday, 0, ',', '.') }}</p>
                 <p class="text-xs mt-1.5 text-white/50">
                     {{ $revenueToday > 0 ? round($profitToday / $revenueToday * 100) : 0 }}% {{ __('margin') }}
                 </p>
@@ -30,14 +33,7 @@
                 <p class="font-serif text-3xl font-bold">{{ $weeklyGrowth }}%</p>
                 <p class="text-xs mt-1.5 text-white/50">{{ __('Last 7 days') }}</p>
             </div>
-            <div class="pl-6 lg:pl-8 col-span-2 lg:col-span-1">
-                <p class="text-[11px] uppercase tracking-widest text-white/50 mb-1.5">{{ __('Average Rating') }}</p>
-                <p class="font-serif text-3xl font-bold flex items-center gap-1.5">
-                    {{ $averageRating }}
-                    <svg class="w-5 h-5 text-sultaf-gold" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 16.9l-6.2 3.4 1.6-6.8L2.2 8.9l6.9-.6L12 2z"/></svg>
-                </p>
-                <p class="text-xs mt-1.5 text-white/50">{{ $totalMenuRated }} {{ __('menu items rated') }}</p>
-            </div>
+            {{-- Panel Average Rating dihapus dari sini --}}
         </div>
     </div>
 
@@ -76,15 +72,11 @@
                     <tbody class="divide-y divide-sultaf-border">
                         @forelse ($recentOrders as $order)
                             <tr>
-                                {{-- DIUBAH: kode_transaksi -> id_transaksi --}}
                                 <td class="px-5 py-3 font-medium text-sultaf-maroon">
                                     #SLT-{{ str_pad($order->id_transaksi, 5, '0', STR_PAD_LEFT) }}
                                 </td>
-                                {{-- DIUBAH: user->name -> user->username --}}
                                 <td class="px-5 py-3 text-sultaf-ink">{{ $order->user->username ?? 'Walk-in' }}</td>
-                                {{-- DIUBAH: nomor_meja -> no_meja --}}
                                 <td class="px-5 py-3 text-sultaf-muted">{{ $order->no_meja ? 'T-'.str_pad($order->no_meja, 2, '0', STR_PAD_LEFT) : '-' }}</td>
-                                {{-- DIUBAH: total_harga -> total_bayar --}}
                                 <td class="px-5 py-3 text-sultaf-ink">Rp {{ number_format($order->total_bayar, 0, ',', '.') }}</td>
                                 <td class="px-5 py-3">
                                     <span class="text-xs font-semibold px-2.5 py-1 rounded-full
@@ -147,24 +139,19 @@
                     <div class="p-5">
                         <div class="flex justify-between items-start mb-3">
                             <div>
-                                {{-- DIUBAH: kode_transaksi -> id_transaksi --}}
                                 <p class="text-xs text-sultaf-muted">
                                     {{ __('Ticket') }} #SLT-{{ str_pad($priorityOrder->id_transaksi, 5, '0', STR_PAD_LEFT) }}
                                 </p>
-                                {{-- DIUBAH: nomor_meja -> no_meja --}}
                                 <p class="font-serif text-lg font-bold text-sultaf-ink">
                                     {{ $priorityOrder->no_meja ? __('Table') . ' ' . $priorityOrder->no_meja : __('Takeaway') }}
                                 </p>
                             </div>
-                            {{-- DIUBAH: tgl_transaksi -> created_at --}}
                             <span class="text-xs text-sultaf-muted">{{ $priorityOrder->created_at->diffForHumans() }}</span>
                         </div>
 
                         <div class="space-y-1.5 mb-4 pb-4 border-b border-dashed border-sultaf-border">
-                            {{-- DIUBAH: items -> detail_transaksi --}}
                             @foreach ($priorityOrder->detail_transaksi as $item)
                                 <div class="flex justify-between text-sm">
-                                    {{-- DIUBAH: qty -> jumlah, nama_makanan -> nama_menu --}}
                                     <span class="text-sultaf-ink/80">{{ $item->jumlah }}x {{ __($item->menu->nama_menu) }}</span>
                                     <span class="text-sultaf-muted">Rp {{ number_format($item->jumlah * $item->harga_satuan, 0, ',', '.') }}</span>
                                 </div>
@@ -176,7 +163,6 @@
 
                         <div class="flex justify-between items-center mb-4">
                             <span class="text-sm font-semibold text-sultaf-ink">{{ __('Total') }}</span>
-                            {{-- DIUBAH: total_harga -> total_bayar --}}
                             <span class="font-serif text-lg font-bold text-sultaf-maroon">Rp {{ number_format($priorityOrder->total_bayar, 0, ',', '.') }}</span>
                         </div>
 

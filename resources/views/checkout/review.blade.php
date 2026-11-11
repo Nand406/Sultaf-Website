@@ -31,26 +31,31 @@
                         <div class="flex items-center gap-4 p-4">
                             <div class="w-16 h-16 rounded-xl bg-sultaf-cream-dark overflow-hidden shrink-0">
                                 @if ($item['menu']->foto_menu)
-                                    <img src="{{ asset('storage/'.$item['menu']->foto_menu) }}" class="w-full h-full object-cover">
+                                    <img src="{{ asset($item['menu']->foto_menu) }}" class="w-full h-full object-cover">
                                 @endif
                             </div>
                             <div class="flex-1">
                                 <p class="font-semibold text-sultaf-ink">{{ __($item['menu']->nama_menu) }}</p>
                                 <div class="flex items-center gap-2 mt-2">
+                                    {{-- Form Kurang (-) --}}
                                     <form method="POST" action="{{ route('cart.decrease', $item['menu']->id_menu) }}">
                                         @csrf
-                                        <button class="w-7 h-7 rounded-full border border-sultaf-border text-sultaf-ink hover:border-sultaf-maroon hover:text-sultaf-maroon">−</button>
+                                        <button class="w-7 h-7 rounded-full border border-sultaf-border text-sultaf-ink hover:border-sultaf-maroon hover:text-sultaf-maroon flex items-center justify-center">−</button>
                                     </form>
+                                    
                                     <span class="text-sm font-semibold text-sultaf-ink w-6 text-center">{{ $item['qty'] }}</span>
+                                    
+                                    {{-- Form Tambah (+) --}}
                                     <form method="POST" action="{{ route('cart.add', $item['menu']->id_menu) }}">
                                         @csrf
                                         <input type="hidden" name="qty" value="1">
-                                        <button class="w-7 h-7 rounded-full border border-sultaf-maroon bg-sultaf-maroon text-white hover:bg-sultaf-maroon-dark">+</button>
+                                        <button class="w-7 h-7 rounded-full border border-sultaf-maroon bg-sultaf-maroon text-white hover:bg-sultaf-maroon-dark flex items-center justify-center">+</button>
                                     </form>
                                 </div>
                             </div>
                             <div class="text-right shrink-0">
                                 <p class="font-semibold text-sultaf-maroon">Rp {{ number_format($item['subtotal'], 0, ',', '.') }}</p>
+                                {{-- Form Hapus --}}
                                 <form method="POST" action="{{ route('cart.remove', $item['menu']->id_menu) }}">
                                     @csrf @method('DELETE')
                                     <button class="text-xs text-sultaf-muted hover:text-sultaf-danger mt-1">{{ __('Remove') }}</button>
@@ -87,7 +92,7 @@
                         </div>
                     </div>
 
-                    <a href="{{ route('checkout.details') }}" class="btn-primary inline-block text-center mt-4">
+                    <a href="{{ route('checkout.details') }}" class="btn-primary inline-block text-center mt-4 w-full">
                         {{ __('Continue to Details') }}
                     </a>
 

@@ -9,35 +9,40 @@ class TransaksiPenjualan extends Model
 {
     use HasFactory;
 
-    // Sesuaikan dengan nama tabel di migration Anda
-    protected $table = 'transaksi_penjualans'; 
-    
-    // Primary key custom
+    protected $table = 'transaksi_penjualans';
     protected $primaryKey = 'id_transaksi';
-    
-    // Aktifkan timestamps (karena migration pakai $table->timestamps())
-    public $timestamps = true; 
+    public $timestamps = true;
 
     protected $fillable = [
-    'kode_transaksi', 'id_user', 'id_promo', 'tipe_pesanan', 
-    'status_pesanan', 'metode_pembayaran', 'diverifikasi_oleh', 
-    'total_bayar', 'uang_bayar', 'status_pembayaran', 
-    'diskon', 'total_harga', 'tgl_transaksi', 'catatan'
-];
+        'id_user', 
+        'id_promo', 
+        'tipe_pesanan', 
+        'status_pesanan',
+        'metode_pembayaran', 
+        'diverifikasi_oleh', 
+        'no_meja', // <--- PASTIKAN INI ADA
+        'status_pembayaran', 
+        'total_bayar', 
+        'uang_bayar', 
+        'diskon', 
+        'total_harga',
+        'no_telepon',
+        'snap_token',
+    ];
 
+    // ... (relasi user, detail_transaksi, promo tetap sama)
     public function user()
     {
-        // Pastikan file User.php ada di app/Models
-        return $this->belongsTo(User::class, 'id_user', 'id_user'); 
-    }
-
-    public function promo()
-    {
-        return $this->belongsTo(Promo::class, 'id_promo', 'id_promo'); 
+        return $this->belongsTo(User::class, 'id_user', 'id_user');
     }
 
     public function detail_transaksi()
     {
         return $this->hasMany(DetailTransaksi::class, 'id_transaksi', 'id_transaksi');
+    }
+
+    public function promo()
+    {
+        return $this->belongsTo(Promo::class, 'id_promo', 'id_promo');
     }
 }

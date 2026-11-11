@@ -13,35 +13,43 @@ class RewardsController extends Controller
     {
         $user = Auth::user();
         $member = $user->member ?? null;
-        $totalPoin = $member ? $member->total_poin : 0;
 
-        // Ambil semua promo
-        $benefits = Promo::orderBy('minimal_poin')->get();
+        // 1. Ambil semua transaksi terverifikasi milik user
+        $verifiedTransactions = TransaksiPenjualan::where('id_user', $user->id_user)
+            ->whereIn('status_pembayaran', ['terverifikasi', 'lunas'])
+            ->latest()
+            ->get();
 
-        // Promo yang sudah bisa diklaim
+        // 2. Hitung Total Poin
+        $totalPoin = $verifiedTransactions->sum(function ($trx) {
+            return floor($trx->total_bayar / 1000);
+        });
+
+        // 3. Cari ID Promo yang sudah pernah dipakai user ini
+        $usedPromoIds = $verifiedTransactions->whereNotNull('id_promo')
+            ->pluck('id_promo')
+            ->unique()
+            ->toArray();
+
+        // 4. Ambil daftar Promo yang BELUM dipakai
+        $benefits = Promo::whereNotIn('id_promo', $usedPromoIds)
+            ->orderBy('minimal_poin')
+            ->get();
+
+        // 5. Riwayat Poin (Ambil 10 terakhir)
+        $pointsHistory = $verifiedTransactions->take(10)->map(function ($trx) {
+            return [
+                'transaksi' => $trx,
+                'poin'      => floor($trx->total_bayar / 1000), 
+            ];
+        });
+
+        // 6. Logika Promo & Benefit
         $claimablePromos = $benefits->filter(fn ($p) => $totalPoin >= $p->minimal_poin);
-
-        // Promo berikutnya (untuk progress bar)
         $nextBenefit = $benefits->first(fn ($p) => $totalPoin < $p->minimal_poin);
-
-        // Promo diskon yang sudah aktif (poin tertinggi yang tercapai)
+        
+        // Active discount adalah promo tertinggi yang tersedia (belum dipakai) dan poinnya cukup
         $activeDiscountBenefit = $claimablePromos->sortByDesc('minimal_poin')->first();
-
-        // Riwayat poin dari transaksi user
-        $pointsHistory = collect();
-        if ($member) {
-            $pointsHistory = TransaksiPenjualan::where('id_user', $user->id_user)
-                ->where('status_pembayaran', 'terverifikasi')
-                ->latest()
-                ->limit(10)
-                ->get()
-                ->map(function ($trx) {
-                    return [
-                        'transaksi' => $trx,
-                        'poin'      => floor($trx->total_bayar / 10000), // 1 poin per Rp 10.000
-                    ];
-                });
-        }
 
         return view('rewards.index', compact(
             'user', 'member', 'totalPoin',

@@ -25,11 +25,12 @@ class PromoMessageController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        // 1. DIUBAH: Validasi menggunakan 'isi_pesan'
         $validated = $request->validate([
-            'judul'    => ['required', 'string', 'max:255'],
-            'id_pesan' => ['required', 'string'],
-            'target'   => ['required', 'in:all,specific'],
-            'id_user'  => ['nullable', 'exists:users,id_user'],
+            'judul'     => ['required', 'string', 'max:255'],
+            'isi_pesan' => ['required', 'string'], 
+            'target'    => ['required', 'in:all,specific'],
+            'id_user'   => ['nullable', 'exists:users,id_user'],
         ]);
 
         if ($validated['target'] === 'all') {
@@ -39,7 +40,7 @@ class PromoMessageController extends Controller
                 Notifikasi::create([
                     'id_user'   => $user->id_user,
                     'id_member' => $user->member->id_member ?? null,
-                    'id_pesan'  => $validated['id_pesan'],
+                    'isi_pesan' => $validated['isi_pesan'], // 2. DIUBAH: Gunakan isi_pesan
                     'judul'     => $validated['judul'],
                 ]);
             }
@@ -52,7 +53,7 @@ class PromoMessageController extends Controller
         Notifikasi::create([
             'id_user'   => $user->id_user,
             'id_member' => $user->member->id_member ?? null,
-            'id_pesan'  => $validated['id_pesan'],
+            'isi_pesan' => $validated['isi_pesan'], // 3. DIUBAH: Gunakan isi_pesan
             'judul'     => $validated['judul'],
         ]);
 
