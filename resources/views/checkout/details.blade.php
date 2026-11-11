@@ -1,7 +1,6 @@
 <x-layouts.app title="{{ __('Order Details') }} - Sultaf">
 
     <div class="px-5 lg:px-0 pt-6 pb-6">
-
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
                 <a href="{{ route('cart.index') }}" class="text-sultaf-ink hover:text-sultaf-maroon">
@@ -21,7 +20,6 @@
         @endif
 
         <div class="flex flex-col lg:flex-row gap-8 items-start">
-
             <div class="flex-1 min-w-0">
                 <form method="POST" action="{{ route('checkout.details.store') }}">
                     @csrf
@@ -32,7 +30,7 @@
                         <label class="cursor-pointer">
                             <input type="radio" name="tipe_pesanan" value="dine_in" class="peer hidden"
                                    {{ old('tipe_pesanan', 'dine_in') === 'dine_in' ? 'checked' : '' }}
-                                   onchange="document.getElementById('tableField').classList.remove('hidden')">
+                                   onchange="document.getElementById('tableField').classList.remove('hidden'); document.getElementById('tableSelect').required = true;">
                             <div class="text-center py-3.5 rounded-xl border border-sultaf-border bg-white font-semibold text-sultaf-ink
                                         peer-checked:bg-sultaf-maroon peer-checked:text-white peer-checked:border-sultaf-maroon transition-colors">
                                 🪑 {{ __('Dine-In') }}
@@ -41,7 +39,7 @@
                         <label class="cursor-pointer">
                             <input type="radio" name="tipe_pesanan" value="takeaway" class="peer hidden"
                                    {{ old('tipe_pesanan') === 'takeaway' ? 'checked' : '' }}
-                                   onchange="document.getElementById('tableField').classList.add('hidden')">
+                                   onchange="document.getElementById('tableField').classList.add('hidden'); document.getElementById('tableSelect').required = false;">
                             <div class="text-center py-3.5 rounded-xl border border-sultaf-border bg-white font-semibold text-sultaf-ink
                                         peer-checked:bg-sultaf-maroon peer-checked:text-white peer-checked:border-sultaf-maroon transition-colors">
                                 🥡 {{ __('Takeaway') }}
@@ -49,9 +47,9 @@
                         </label>
                     </div>
 
-                    <div id="tableField" class="mb-6">
+                    <div id="tableField" class="mb-8">
                         <label class="block text-sm font-semibold text-sultaf-ink mb-1.5">{{ __('Table Number') }}</label>
-                        <select name="nomor_meja" class="input-field appearance-none cursor-pointer">
+                        <select id="tableSelect" name="nomor_meja" class="input-field appearance-none cursor-pointer" required>
                             <option value="" disabled selected>-- {{ __('Choose table number') }} --</option>
                             @for ($n = 1; $n <= 20; $n++)
                                 <option value="{{ $n }}" {{ old('nomor_meja') == $n ? 'selected' : '' }}>
@@ -65,14 +63,9 @@
                         </div>
                     </div>
 
-                    <div class="mb-8">
-                        <label class="block text-sm font-semibold text-sultaf-ink mb-2">{{ __('Special Instructions') }}</label>
-                        <textarea name="catatan" rows="4"
-                                  placeholder="{{ __('Any allergies or dietary preferences? Let our chef know...') }}"
-                                  class="input-field">{{ old('catatan') }}</textarea>
-                    </div>
+                    {{-- BLOK SPECIAL INSTRUCTIONS SUDAH DIHAPUS --}}
 
-                    <button type="submit" class="btn-primary flex items-center justify-center gap-2">
+                    <button type="submit" class="btn-primary flex items-center justify-center gap-2 mt-8">
                         {{ __('Proceed to Payment') }}
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
                     </button>
@@ -88,21 +81,18 @@
                         <p class="text-white/60 text-sm mt-2">Sultaf Yogyakarta Main Branch</p>
                     </div>
                 </div>
-
-                <div class="bg-white rounded-2xl border border-sultaf-border/70 p-4 mt-4">
-                    <p class="text-xs text-sultaf-muted uppercase tracking-wide mb-3">{{ __('Preparation Timing') }}</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="border border-sultaf-maroon bg-sultaf-maroon/5 rounded-xl p-3 text-center">
-                            <p class="text-sultaf-maroon text-lg">⚡</p>
-                            <p class="text-xs font-semibold text-sultaf-maroon mt-1">{{ __('ASAP') }}</p>
-                        </div>
-                        <div class="border border-sultaf-border rounded-xl p-3 text-center text-sultaf-muted">
-                            <p class="text-lg">🕐</p>
-                            <p class="text-xs font-semibold mt-1">{{ __('Schedule') }}</p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const isTakeaway = document.querySelector('input[name="tipe_pesanan"][value="takeaway"]').checked;
+            const tableSelect = document.getElementById('tableSelect');
+            
+            if (isTakeaway) {
+                tableSelect.required = false;
+            }
+        });
+    </script>
 </x-layouts.app>

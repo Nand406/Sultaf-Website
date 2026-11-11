@@ -95,8 +95,9 @@ class OwnerDashboardController extends Controller
 
         $revenueByHour = collect();
         $profitByHour = collect();
-        // Loop dari jam 8 pagi sampai 10 malam
-        for ($h = 8; $h <= 22; $h++) {
+        
+        // DIUBAH: Looping dari jam 00:00 sampai 23:00 agar semua transaksi masuk
+        for ($h = 0; $h <= 23; $h++) {
             $revenueByHour->push([
                 'label' => str_pad($h, 2, '0', STR_PAD_LEFT) . ':00',
                 'value' => (float) ($revenueByHourRaw->get($h)->total ?? 0),
@@ -118,6 +119,7 @@ class OwnerDashboardController extends Controller
 
     protected function verifiedQuery()
     {
-        return TransaksiPenjualan::where('status_pembayaran', 'terverifikasi');
+        // DIUBAH: Menambahkan 'lunas' dan 'Lunas' agar data dummy lama ikut terhitung
+        return TransaksiPenjualan::whereIn('status_pembayaran', ['terverifikasi', 'lunas', 'Lunas']);
     }
 }

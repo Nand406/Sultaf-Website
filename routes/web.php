@@ -95,11 +95,18 @@ Route::middleware('auth')->group(function () {
 */
 Route::middleware(['auth', 'role:kasir,admin,owner'])->prefix('kasir')->name('kasir.')->group(function () {
     Route::get('/', [KasirDashboardController::class, 'index'])->name('dashboard');
+    
+    // Pembayaran
     Route::get('/pembayaran', [PembayaranController::class, 'index'])->name('pembayaran');
     Route::post('/pembayaran/{transaksi}/verify', [PembayaranController::class, 'verify'])->name('pembayaran.verify');
     Route::post('/pembayaran/{transaksi}/reject', [PembayaranController::class, 'reject'])->name('pembayaran.reject');
+    Route::get('/pembayaran/receipt/{transaksi}', [PembayaranController::class, 'receipt'])->name('pembayaran.receipt');
+    
+    // Pesanan
     Route::get('/pesanan', [KasirPesananController::class, 'index'])->name('pesanan');
     Route::post('/pesanan/{transaksi}/update', [KasirPesananController::class, 'updateStatus'])->name('pesanan.update');
+    
+    // POS Offline
     Route::get('/pos', [PosController::class, 'index'])->name('pos');
     Route::post('/pos/{menu}/add', [PosController::class, 'addItem'])->name('pos.add');
     Route::post('/pos/{menu}/decrease', [PosController::class, 'decreaseItem'])->name('pos.decrease');
@@ -107,6 +114,9 @@ Route::middleware(['auth', 'role:kasir,admin,owner'])->prefix('kasir')->name('ka
     Route::post('/pos/clear', [PosController::class, 'clearCart'])->name('pos.clear');
     Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
     Route::get('/pos/receipt/{transaksi}', [PosController::class, 'receipt'])->name('pos.receipt');
+    
+    // TAMBAHAN: Cek Member POS
+    Route::post('/pos/check-member', [PosController::class, 'checkMember'])->name('pos.check-member');
 });
 
 /*
@@ -130,6 +140,7 @@ Route::middleware(['auth', 'role:dapur,admin,owner'])->prefix('dapur')->name('da
 Route::middleware(['auth', 'role:admin,owner'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+    // Menu
     Route::get('/menu', [MenuManagementController::class, 'index'])->name('menu.index');
     Route::get('/menu/create', [MenuManagementController::class, 'create'])->name('menu.create');
     Route::post('/menu', [MenuManagementController::class, 'store'])->name('menu.store');
@@ -138,6 +149,7 @@ Route::middleware(['auth', 'role:admin,owner'])->prefix('admin')->name('admin.')
     Route::delete('/menu/{menu}', [MenuManagementController::class, 'destroy'])->name('menu.destroy');
     Route::post('/menu/{menu}/toggle', [MenuManagementController::class, 'toggleHabis'])->name('menu.toggle');
 
+    // Benefit / Promo
     Route::get('/benefit', [BenefitController::class, 'index'])->name('benefit.index');
     Route::get('/benefit/create', [BenefitController::class, 'create'])->name('benefit.create');
     Route::post('/benefit', [BenefitController::class, 'store'])->name('benefit.store');
@@ -146,7 +158,8 @@ Route::middleware(['auth', 'role:admin,owner'])->prefix('admin')->name('admin.')
     Route::delete('/benefit/{benefit}', [BenefitController::class, 'destroy'])->name('benefit.destroy');
     Route::post('/benefit/{benefit}/toggle', [BenefitController::class, 'toggle'])->name('benefit.toggle');
 
-        Route::get('/promo', [PromoMessageController::class, 'index'])->name('promo.index');
+    // Promo Message
+    Route::get('/promo', [PromoMessageController::class, 'index'])->name('promo.index');
     Route::get('/promo/create', [PromoMessageController::class, 'create'])->name('promo.create');
     Route::post('/promo', [PromoMessageController::class, 'store'])->name('promo.store');
     Route::delete('/promo/{promo}', [PromoMessageController::class, 'destroy'])->name('promo.destroy');
@@ -161,3 +174,10 @@ Route::middleware(['auth', 'role:owner,admin'])->prefix('owner')->name('owner.')
     Route::get('/', [OwnerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
 });
+
+/*
+|--------------------------------------------------------------------------
+| Midtrans Callback
+|--------------------------------------------------------------------------
+*/
+Route::post('/midtrans/callback', [CheckoutController::class, 'callback'])->name('midtrans.callback');

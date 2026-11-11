@@ -9,8 +9,8 @@
 </head>
 <body class="min-h-screen bg-sultaf-pattern flex flex-col">
 
-    {{-- ===================== TOP HEADER ===================== --}}
-    <div class="sticky top-0 z-30 bg-sultaf-cream/95 backdrop-blur border-b border-sultaf-border/40">
+    {{-- ===================== TOP HEADER (STICKY) ===================== --}}
+    <div class="sticky top-0 z-50 bg-sultaf-cream/95 backdrop-blur-md border-b border-sultaf-border/40 shadow-sm">
         <div class="w-full max-w-md lg:max-w-none mx-auto px-5 lg:px-10 xl:px-16 py-4">
             <div class="flex items-center justify-between">
 
@@ -41,13 +41,32 @@
                             {{ strtoupper(substr(auth()->user()->username, 0, 1)) }}
                         </a>
 
+                        {{-- LOGIKA CEK NOTIFIKASI BELUM DIBACA (BERDASARKAN ID) --}}
+                        @php
+                            // Ambil ID terakhir yang dibaca dari cache (default 0)
+                            $lastReadId = \Illuminate\Support\Facades\Cache::get('notif_last_id_' . auth()->user()->id_user, 0);
+                            
+                            // Hitung notifikasi yang ID-nya lebih besar dari ID terakhir baca
+                            $unreadCount = \App\Models\Notifikasi::where('id_user', auth()->user()->id_user)
+                                ->where('id_notifikasi', '>', $lastReadId)
+                                ->count();
+                        @endphp
+
                         {{-- NOTIFIKASI --}}
                         <a href="{{ route('notifications.index') }}"
-                           class="w-8 h-8 rounded-full bg-white border border-sultaf-border flex items-center justify-center text-sultaf-muted hover:text-sultaf-maroon transition-colors">
+                           class="relative w-8 h-8 rounded-full bg-white border border-sultaf-border flex items-center justify-center text-sultaf-muted hover:text-sultaf-maroon transition-colors">
                             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
                                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                             </svg>
+                            
+                            {{-- BADGE ANGKA MERAH (INLINE CSS) --}}
+                            @if($unreadCount > 0)
+                                <span class="absolute flex items-center justify-center text-white font-bold border-2 border-white shadow-sm"
+                                      style="top: -6px; right: -6px; background-color: #ef4444; min-width: 18px; height: 18px; font-size: 10px; border-radius: 9999px; padding: 0 4px; z-index: 10;">
+                                    {{ $unreadCount > 9 ? '9+' : $unreadCount }}
+                                </span>
+                            @endif
                         </a>
                     @else
                         <a href="{{ route('login') }}"
@@ -66,7 +85,9 @@
                             <path d="M1 1h4l2.4 12.4a2 2 0 0 0 2 1.6h8.6a2 2 0 0 0 2-1.6L23 6H6"/>
                         </svg>
                         @if (session('cart') && count(session('cart')))
-                            <span class="absolute -top-1 -right-1 bg-sultaf-maroon text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                            {{-- BADGE KERANJANG --}}
+                            <span class="absolute flex items-center justify-center text-white font-bold border-2 border-white shadow-sm"
+                                  style="top: -6px; right: -6px; background-color: #7A1620; min-width: 18px; height: 18px; font-size: 10px; border-radius: 9999px; padding: 0 4px; z-index: 10;">
                                 {{ count(session('cart')) }}
                             </span>
                         @endif
@@ -77,7 +98,7 @@
     </div>
 
     {{-- ===================== KONTEN UTAMA ===================== --}}
-    <div class="flex-1 w-full max-w-md lg:max-w-none mx-auto pb-24 lg:pb-10 px-0 lg:px-10 xl:px-16">
+    <div class="flex-1 w-full max-w-md lg:max-w-none mx-auto pb-24 lg:pb-10 px-0 lg:px-10 xl:px-16 relative">
         {{ $slot }}
     </div>
 

@@ -9,24 +9,19 @@ use Illuminate\View\View;
 
 class CartController extends Controller
 {
-    // Tampilkan isi keranjang (Checkout Step 1: Review)
-    public function add(Request $request)
+    // 1. DIUBAH: Menambahkan Menu $menu untuk menangkap ID dari URL
+    public function add(Request $request, Menu $menu): RedirectResponse
     {
-        // 1. Tangkap ID menggunakan id_menu dari form HTML
-        $id = $request->id_menu; 
-        $qty = $request->qty ?? 1;
-
-        // Jika ID kosong, kembalikan error
-        if (!$id) {
-            return back()->with('error', 'Gagal menambahkan: ID Menu tidak ditemukan.');
-        }
-
+        $qty = max(1, (int) $request->input('qty', 1));
         $cart = session()->get('cart', []);
+        
+        // DIUBAH: Gunakan $menu->id_menu sebagai key array session
+        $menuId = $menu->id_menu;
 
-        if (isset($cart[$id])) {
-            $cart[$id] += $qty;
+        if (isset($cart[$menuId])) {
+            $cart[$menuId] += $qty;
         } else {
-            $cart[$id] = $qty;
+            $cart[$menuId] = $qty;
         }
 
         session()->put('cart', $cart);
@@ -34,13 +29,12 @@ class CartController extends Controller
         return back()->with('success', 'Menu berhasil ditambahkan ke keranjang!');
     }
 
-    public function index()
+    public function index(): View
     {
         $cart = session()->get('cart', []);
         $cartIds = array_keys($cart);
 
-        // 2. WAJIB MENGGUNAKAN id_menu DI SINI
-        $menus = \App\Models\Menu::whereIn('id_menu', $cartIds)->get()->keyBy('id_menu');
+        $menus = Menu::whereIn('id_menu', $cartIds)->get()->keyBy('id_menu');
 
         $items = collect();
         $subtotal = 0;
@@ -65,14 +59,16 @@ class CartController extends Controller
         return view('checkout.review', compact('items', 'subtotal', 'tax', 'total'));
     }
 
-    // Kurangi 1 dari item di keranjang
-    public function decrease(Request $request, Menu $menu): RedirectResponse
+    // 2. DIUBAH: $menu->id menjadi $menu->id_menu
+    public function decrease(Menu $menu): RedirectResponse
     {
         $cart = $this->getCart();
-        if (isset($cart[$menu->id])) {
-            $cart[$menu->id]--;
-            if ($cart[$menu->id] <= 0) {
-                unset($cart[$menu->id]);
+        $menuId = $menu->id_menu; // <--- Perbaikan di sini
+        
+        if (isset($cart[$menuId])) {
+            $cart[$menuId]--;
+            if ($cart[$menuId] <= 0) {
+                unset($cart[$menuId]);
             }
         }
         session(['cart' => $cart]);
@@ -80,11 +76,13 @@ class CartController extends Controller
         return back();
     }
 
-    // Hapus item dari keranjang
+    // 3. DIUBAH: $menu->id menjadi $menu->id_menu
     public function remove(Menu $menu): RedirectResponse
     {
         $cart = $this->getCart();
-        unset($cart[$menu->id]);
+        $menuId = $menu->id_menu; // <--- Perbaikan di sini
+        
+        unset($cart[$menuId]);
         session(['cart' => $cart]);
 
         return back();

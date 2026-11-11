@@ -34,8 +34,9 @@
                                     {{ $notif->created_at->diffForHumans() }}
                                 </span>
                             </div>
+                            {{-- DIUBAH: id_pesan menjadi isi_pesan --}}
                             <p class="text-sm text-sultaf-muted leading-relaxed">
-                                {{ $notif->id_pesan }}
+                                {{ $notif->isi_pesan }}
                             </p>
                         </div>
                     </div>

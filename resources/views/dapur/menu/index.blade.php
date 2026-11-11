@@ -1,4 +1,4 @@
-<x-layouts.dapur title="Ketersediaan Menu - Dapur Sultaf" pageTitle="Menu Availability">
+<x-layouts.dapur title="Ketersediaan Menu - Dapur Sultaf" pageTitle="Ketersediaan Menu">
 
     @if (session('success'))
         <div class="mb-6 bg-sultaf-success-soft border border-sultaf-success/20 text-sultaf-success text-sm rounded-xl px-4 py-3">
@@ -6,25 +6,64 @@
         </div>
     @endif
 
-    {{-- Header & Search --}}
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <form method="GET" action="{{ route('dapur.menu.index') }}" class="w-full sm:w-80">
+    {{-- ===================== HEADER & SEARCH & STATS ===================== --}}
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
+        
+        {{-- Search Bar --}}
+        <form method="GET" action="{{ route('dapur.menu.index') }}" class="w-full lg:w-80">
+            {{-- Pertahankan kategori saat mencari --}}
+            @if(request('category'))
+                <input type="hidden" name="category" value="{{ request('category') }}">
+            @endif
             <input type="text" name="search" value="{{ request('search') }}"
                    placeholder="Cari nama menu..."
                    class="w-full border border-sultaf-border rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:border-sultaf-maroon">
         </form>
-        <p class="text-sm text-sultaf-muted">
-            <strong class="text-sultaf-maroon">{{ $totalTersedia ?? 0 }}</strong> tersedia • 
-            <strong class="text-sultaf-danger">{{ $totalHabis ?? 0 }}</strong> habis
-        </p>
+        
+        {{-- Badges Statistik --}}
+        <div class="flex items-center gap-3 w-full lg:w-auto">
+            <div class="flex-1 lg:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sultaf-success-soft text-sultaf-success font-semibold text-sm border border-sultaf-success/20">
+                <span class="w-2 h-2 rounded-full bg-sultaf-success"></span>
+                {{ $totalTersedia }} Tersedia
+            </div>
+            <div class="flex-1 lg:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-sultaf-danger-soft text-sultaf-danger font-semibold text-sm border border-sultaf-danger/20">
+                <span class="w-2 h-2 rounded-full bg-sultaf-danger"></span>
+                {{ $totalHabis }} Habis
+            </div>
+        </div>
     </div>
 
-    {{-- Grid Menu --}}
+        {{-- ===================== FILTER KATEGORI ===================== --}}
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        {{-- Tambahkan ['search' => request('search')] di setiap route --}}
+        <a href="{{ route('dapur.menu.index', ['search' => request('search')]) }}" 
+           class="px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
+                  {{ !$category ? 'bg-sultaf-maroon text-white' : 'bg-white border border-sultaf-border text-sultaf-ink hover:bg-sultaf-cream' }}">
+            Semua
+        </a>
+        <a href="{{ route('dapur.menu.index', ['category' => 'makanan', 'search' => request('search')]) }}" 
+           class="px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
+                  {{ $category === 'makanan' ? 'bg-sultaf-maroon text-white' : 'bg-white border border-sultaf-border text-sultaf-ink hover:bg-sultaf-cream' }}">
+            Makanan
+        </a>
+        <a href="{{ route('dapur.menu.index', ['category' => 'minuman', 'search' => request('search')]) }}" 
+           class="px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
+                  {{ $category === 'minuman' ? 'bg-sultaf-maroon text-white' : 'bg-white border border-sultaf-border text-sultaf-ink hover:bg-sultaf-cream' }}">
+            Minuman
+        </a>
+        <a href="{{ route('dapur.menu.index', ['category' => 'camilan', 'search' => request('search')]) }}" 
+           class="px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
+                  {{ $category === 'camilan' ? 'bg-sultaf-maroon text-white' : 'bg-white border border-sultaf-border text-sultaf-ink hover:bg-sultaf-cream' }}">
+            Camilan
+        </a>
+    </div>
+
+    {{-- ===================== GRID MENU ===================== --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         @forelse ($menus as $menu)
             <div class="bg-white rounded-2xl border border-sultaf-border overflow-hidden flex flex-col">
                 {{-- Foto Menu --}}
-                <div class="h-40 bg-sultaf-cream flex items-center justify-center overflow-hidden relative">
+                <div class="h-40 bg-sultaf-cream flex items-center justify-center overflow-hidden relative shrink-0">
                     @if ($menu->foto_menu)
                         <img src="{{ asset($menu->foto_menu) }}" alt="{{ $menu->nama_menu }}" class="w-full h-full object-cover">
                     @else
@@ -45,6 +84,7 @@
                 {{-- Info Menu --}}
                 <div class="p-4 flex-1 flex flex-col">
                     <h3 class="font-semibold text-sultaf-ink mb-1">{{ $menu->nama_menu }}</h3>
+                    <p class="text-xs text-sultaf-muted capitalize mb-2">{{ $menu->kategori ?? 'Menu' }}</p>
                     
                     <p class="text-sm text-sultaf-maroon font-bold mb-4">
                         Rp {{ number_format($menu->harga, 0, ',', '.') }}

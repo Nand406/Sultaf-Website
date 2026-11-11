@@ -27,16 +27,18 @@
         <div class="px-6 py-4 border-b border-sultaf-gold/20">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-sultaf-gold/15 border border-sultaf-gold/30 flex items-center justify-center">
-                    <span class="text-sultaf-gold-light font-bold text-sm">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                    {{-- DIUBAH: name menjadi username --}}
+                    <span class="text-sultaf-gold-light font-bold text-sm">{{ strtoupper(substr(auth()->user()->username ?? 'O', 0, 1)) }}</span>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-sm font-semibold text-white truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-white/50 capitalize">{{ auth()->user()->role }}</p>
+                    {{-- DIUBAH: name menjadi username --}}
+                    <p class="text-sm font-semibold text-white truncate">{{ auth()->user()->username ?? 'Owner' }}</p>
+                    <p class="text-xs text-white/50 capitalize">{{ auth()->user()->role ?? 'owner' }}</p>
                 </div>
             </div>
         </div>
 
-        <nav class="flex-1 px-4 py-4 space-y-1">
+        <nav class="px-4 py-4 space-y-1">
             <a href="{{ route('owner.dashboard') }}"
                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors
                       {{ request()->routeIs('owner.dashboard') ? 'bg-sultaf-gold text-sultaf-maroon-dark font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
@@ -68,6 +70,7 @@
             </div>
         </nav>
 
+        {{-- Blok Logout & Language Switch --}}
         <div class="px-4 py-5 border-t border-sultaf-gold/20 space-y-3">
             <div class="px-1">
                 @include('components.lang-switch')
@@ -81,13 +84,15 @@
                 </button>
             </form>
         </div>
+
+        <div class="flex-1"></div>
     </aside>
 
     {{-- ===== KONTEN UTAMA ===== --}}
     <main class="flex-1 min-w-0 flex flex-col">
         <header class="bg-white/70 backdrop-blur border-b border-sultaf-border px-8 py-5 flex items-center justify-between sticky top-0 z-10">
             <div>
-                <h1 class="font-serif text-2xl font-bold text-sultaf-ink">{{ $pageTitle ?? __('Admin Overview') }}</h1>
+                <h1 class="font-serif text-2xl font-bold text-sultaf-ink">{{ $pageTitle ?? __('Dashboard') }}</h1>
                 <p class="text-xs text-sultaf-muted mt-0.5">{{ now()->translatedFormat('l, d F Y') }}</p>
             </div>
         </header>

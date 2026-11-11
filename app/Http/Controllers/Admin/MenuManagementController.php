@@ -60,8 +60,9 @@ class MenuManagementController extends Controller
 
         public function update(Request $request, Menu $menu): RedirectResponse
     {
-        $validated = $request->validate([
+                $validated = $request->validate([
             'nama_menu' => ['required', 'string', 'max:255'],
+            'kategori' => ['required', 'in:makanan,minuman,camilan'], // <--- Tambah ini
             'harga' => ['required', 'numeric', 'min:0'],
             'foto_menu' => ['nullable', 'image', 'max:2048'],
             'status_ketersediaan' => ['required', 'in:tersedia,habis'],

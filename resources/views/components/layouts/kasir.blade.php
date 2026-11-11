@@ -40,13 +40,13 @@
             @include('components.panel-switcher')
         </div>
 
-        <nav class="flex-1 px-4 py-4 space-y-1">
+        <nav class="px-4 py-4 space-y-1">
             @php
                 $navItems = [
                     ['label' => __('Dashboard'),   'route' => 'kasir.dashboard',   'icon' => 'dashboard'],
                     ['label' => __('Verification'),  'route' => 'kasir.pembayaran',  'icon' => 'verify'],
                     ['label' => __('Order Status'), 'route' => 'kasir.pesanan', 'icon' => 'orders'],
-                    ['label' => __('POS (Offline)'), 'route' => 'kasir.pos',     'icon' => 'pos'],
+                    ['label' => __('Pesanan Offline'), 'route' => 'kasir.pos',     'icon' => 'pos'],
                 ];
             @endphp
 
@@ -87,6 +87,7 @@
                 </button>
             </form>
         </div>
+        <div class="flex-1"></div>
     </aside>
 
     {{-- ===== KONTEN UTAMA — krem, lebar penuh, tidak dibatasi ===== --}}

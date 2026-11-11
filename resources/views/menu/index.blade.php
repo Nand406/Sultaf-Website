@@ -47,9 +47,7 @@
                     </button>
                     <form id="modalForm" method="POST">
                         @csrf
-                        {{-- Input tersembunyi untuk mengirimkan id_menu yang dipilih --}}
                         <input type="hidden" name="id_menu" id="modalMenuId" value="">
-                        
                         <input type="hidden" name="qty" id="modalQtyInput" value="1">
                         <button type="submit"
                                 class="w-full py-3.5 rounded-xl bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white font-semibold transition-colors">
@@ -62,7 +60,7 @@
     </div>
 
     {{-- ===================== HERO BANNER ===================== --}}
-    <div class="px-5 lg:px-0 mb-6">
+    <div class="px-5 lg:px-0 pt-4 mb-6">
         <div class="bg-sultaf-maroon-dark bg-sultaf-pattern-dark rounded-2xl px-6 py-8 lg:px-10 lg:py-12 text-white relative overflow-hidden">
             <div class="relative z-10 max-w-xl">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-sultaf-gold-light mb-3">
@@ -76,21 +74,49 @@
         </div>
     </div>
 
-    {{-- ===================== DAFTAR MENU ===================== --}}
-    <div class="px-5 lg:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-6">
+    {{-- ===================== TOMBOL FILTER KATEGORI ===================== --}}
+    <div class="px-5 lg:px-0 mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <a href="{{ route('menu.index') }}" 
+           class="px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
+                  {{ !request('category') ? 'bg-sultaf-maroon text-white' : 'bg-white border border-sultaf-border text-sultaf-ink hover:bg-sultaf-cream' }}">
+            Semua
+        </a>
+        <a href="{{ route('menu.index', ['category' => 'makanan']) }}" 
+           class="px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
+                  {{ request('category') === 'makanan' ? 'bg-sultaf-maroon text-white' : 'bg-white border border-sultaf-border text-sultaf-ink hover:bg-sultaf-cream' }}">
+            Makanan
+        </a>
+        <a href="{{ route('menu.index', ['category' => 'minuman']) }}" 
+           class="px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
+                  {{ request('category') === 'minuman' ? 'bg-sultaf-maroon text-white' : 'bg-white border border-sultaf-border text-sultaf-ink hover:bg-sultaf-cream' }}">
+            Minuman
+        </a>
+        <a href="{{ route('menu.index', ['category' => 'camilan']) }}" 
+           class="px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-colors
+                  {{ request('category') === 'camilan' ? 'bg-sultaf-maroon text-white' : 'bg-white border border-sultaf-border text-sultaf-ink hover:bg-sultaf-cream' }}">
+            Camilan
+        </a>
+    </div>
+
+        {{-- ===================== DAFTAR MENU ===================== --}}
+    <div class="px-5 lg:px-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6 items-stretch">
         @forelse ($menus as $menu)
-            <div class="bg-white rounded-2xl overflow-hidden border border-sultaf-border/70 shadow-sm flex flex-col {{ $menu->status_ketersediaan == 'Habis' ? 'grayscale opacity-75' : 'hover:shadow-md transition-shadow' }}">
-                <div class="relative h-44">
+            {{-- Card pembungkus --}}
+            <div class="bg-white rounded-2xl overflow-hidden border border-sultaf-border/70 shadow-sm flex flex-col h-full {{ $menu->status_ketersediaan == 'habis' ? 'grayscale opacity-75' : 'hover:shadow-md transition-shadow' }}">
+                
+                {{-- KUNCI PERBAIKAN: Menggunakan Inline Style (style="...") agar dipaksa seragam --}}
+                <div class="relative w-full bg-sultaf-cream flex-shrink-0" style="height: 220px; overflow: hidden;">
                     @if ($menu->foto_menu)
                         <img src="{{ asset($menu->foto_menu) }}" alt="{{ __($menu->nama_menu) }}"
-                             class="w-full h-full object-cover">
+                             class="w-full h-full"
+                             style="object-fit: cover; object-position: center;">
                     @else
-                        <div class="w-full h-full bg-sultaf-cream-dark flex items-center justify-center text-sultaf-muted text-sm">
+                        <div class="w-full h-full flex items-center justify-center text-sultaf-muted text-sm">
                             {{ __('No photo') }}
                         </div>
                     @endif
 
-                    @if ($menu->status_ketersediaan == 'Habis')
+                    @if ($menu->status_ketersediaan == 'habis')
                         <div class="absolute inset-0 bg-black/55 flex items-center justify-center">
                             <span class="text-white font-semibold text-sm bg-black/50 border border-white/30 px-4 py-2 rounded-full text-center">
                                 {{ __('Menu Unavailable') }}
@@ -99,15 +125,18 @@
                     @endif
                 </div>
 
-                <div class="p-4 flex-1 flex flex-col">
-                    <h3 class="font-serif text-lg font-semibold text-sultaf-ink leading-snug">{{ __($menu->nama_menu) }}</h3>
+                {{-- KONTEN --}}
+                <div class="p-4 flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-serif text-lg font-semibold text-sultaf-ink leading-snug line-clamp-2">{{ __($menu->nama_menu) }}</h3>
+                    </div>
 
-                    <div class="flex items-center justify-between mt-auto pt-3">
+                    <div class="flex items-center justify-between mt-4">
                         <div>
                             <p class="font-serif text-lg font-bold text-sultaf-maroon">Rp {{ number_format($menu->harga, 0, ',', '.') }}</p>
                         </div>
 
-                        @if ($menu->status_ketersediaan != 'Habis')
+                        @if ($menu->status_ketersediaan != 'habis')
                             <button
                                 onclick="openModal(
                                     {{ $menu->id_menu }},
@@ -132,6 +161,7 @@
         @endforelse
     </div>
 
+    {{-- ===================== SCRIPT MODAL ===================== --}}
     <script>
         let currentQty = 1;
         let currentPrice = 0;
@@ -140,9 +170,7 @@
             currentQty = 1;
             currentPrice = harga;
 
-            // Suntikkan id_menu ke dalam modal form
             document.getElementById('modalMenuId').value = menuId;
-            
             document.getElementById('modalMenuName').textContent = menuName;
             document.getElementById('modalMenuDesc').textContent = menuDesc;
             document.getElementById('modalMenuPrice').textContent = formatRp(harga);

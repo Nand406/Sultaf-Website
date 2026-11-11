@@ -18,6 +18,8 @@
                 <p class="font-serif text-3xl font-bold">{{ $stats['promosi_aktif'] }}</p>
             </div>
             <div class="pl-6">
+                {{-- Bagian kosong bawaan dari file asli --}}
+            </div>
         </div>
     </div>
 
@@ -57,7 +59,8 @@
             <div class="divide-y divide-sultaf-border">
                 @forelse ($menuTerlaris as $item)
                     <div class="px-5 py-3 flex items-center justify-between">
-                        <span class="text-sm text-sultaf-ink">{{ $item['menu']->nama_makanan ?? '-' }}</span>
+                        {{-- DIUBAH: nama_makanan menjadi nama_menu --}}
+                        <span class="text-sm text-sultaf-ink">{{ $item['menu']->nama_menu ?? 'Menu Dihapus' }}</span>
                         <span class="text-sm font-semibold text-sultaf-maroon">{{ $item['qty'] }} terjual</span>
                     </div>
                 @empty

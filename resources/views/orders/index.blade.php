@@ -9,7 +9,10 @@
             @forelse ($orders as $order)
                 <a href="{{ route('orders.show', $order) }}" class="block bg-white rounded-2xl p-4 shadow-sm">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="font-semibold text-sultaf-ink">#{{ $order->kode_transaksi }}</span>
+                        {{-- DIUBAH: kode_transaksi -> id_transaksi --}}
+                        <span class="font-semibold text-sultaf-ink">
+                            #SLT-{{ str_pad($order->id_transaksi, 5, '0', STR_PAD_LEFT) }}
+                        </span>
                         <span class="text-xs font-semibold uppercase px-2.5 py-1 rounded-full
                                      {{ match($order->status_pesanan) {
                                          'pending' => 'bg-amber-100 text-amber-700',
@@ -22,9 +25,15 @@
                             {{ __(ucfirst($order->status_pesanan)) }}
                         </span>
                     </div>
-                    <p class="text-sm text-sultaf-muted">{{ $order->tgl_transaksi->format('d M Y, H:i') }}</p>
+                    
+                    {{-- DIUBAH: tgl_transaksi -> created_at --}}
+                    <p class="text-sm text-sultaf-muted">
+                        {{ $order->created_at ? $order->created_at->format('d M Y, H:i') : '-' }}
+                    </p>
+                    
+                    {{-- DIUBAH: total_harga -> total_bayar --}}
                     <p class="font-serif text-lg font-bold text-sultaf-maroon mt-1">
-                        Rp {{ number_format($order->total_harga, 0, ',', '.') }}
+                        Rp {{ number_format($order->total_bayar, 0, ',', '.') }}
                     </p>
                 </a>
             @empty

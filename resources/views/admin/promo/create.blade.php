@@ -14,9 +14,11 @@
 
             <div>
                 <label class="block text-sm font-semibold text-sultaf-ink mb-1.5">Isi Pesan</label>
-                <textarea name="id_pesan" rows="4" placeholder="Tulis isi pesan..." required
-                          class="w-full border border-sultaf-border rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:border-sultaf-maroon">{{ old('id_pesan') }}</textarea>
-                @error('id_pesan') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                {{-- DIUBAH: name="id_pesan" menjadi name="isi_pesan" --}}
+                <textarea name="isi_pesan" rows="4" placeholder="Tulis isi pesan..." required
+                          class="w-full border border-sultaf-border rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:border-sultaf-maroon">{{ old('isi_pesan') }}</textarea>
+                {{-- DIUBAH: @error('id_pesan') menjadi @error('isi_pesan') --}}
+                @error('isi_pesan') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
             <div>

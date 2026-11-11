@@ -40,7 +40,7 @@
             @include('components.panel-switcher')
         </div>
 
-        <nav class="flex-1 px-4 py-4 space-y-1">
+        <nav class="px-4 py-4 space-y-1">
             @php
                 $navItems = [
                     ['label' => __('Dashboard'),        'route' => 'admin.dashboard',      'icon' => 'dashboard'],
@@ -94,6 +94,7 @@
                 </button>
             </form>
         </div>
+        <div class="flex-1"></div>
     </aside>
 
     {{-- ===== KONTEN UTAMA ===== --}}

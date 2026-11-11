@@ -9,12 +9,12 @@
 </head>
 <body class="min-h-screen bg-sultaf-cream flex">
 
-    {{-- ===== SIDEBAR — terracotta gelap, identitas visual berbeda dari Kasir/Admin tapi 1 keluarga ===== --}}
-    <aside class="w-64 shrink-0 bg-sultaf-clay-dark bg-sultaf-pattern-dark flex flex-col min-h-screen sticky top-0 text-white">
+    {{-- ===== SIDEBAR — Warna dan Struktur Disamakan dengan Kasir ===== --}}
+    <aside class="w-64 shrink-0 bg-sultaf-maroon-dark bg-sultaf-pattern-dark flex flex-col min-h-screen sticky top-0 text-white">
         <div class="px-6 py-6 border-b border-white/10">
             <div class="flex items-center gap-2.5 mb-1">
                 <div class="w-8 h-8 rounded-lg bg-sultaf-gold flex items-center justify-center">
-                    <svg viewBox="0 0 24 24" class="w-4 h-4 text-sultaf-clay-dark" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <svg viewBox="0 0 24 24" class="w-4 h-4 text-sultaf-maroon-dark" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                         <path d="M5 3v6a2 2 0 0 0 2 2v10M5 3v6M9 3v6M7 11V3"/>
                         <path d="M19 3c-2.5 1-3.5 4-2 7l1 2-3 9M19 3l-3 9"/>
                     </svg>
@@ -27,23 +27,25 @@
         <div class="px-6 py-4 border-b border-white/10">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
-                    <span class="text-sultaf-gold-light font-bold text-sm">{{ substr(auth()->user()->name, 0, 1) }}</span>
+                    {{-- Menggunakan username, bukan name --}}
+                    <span class="text-sultaf-gold-light font-bold text-sm">{{ strtoupper(substr(auth()->user()->username ?? 'D', 0, 1)) }}</span>
                 </div>
                 <div class="min-w-0">
-                    <p class="text-sm font-semibold text-white truncate">{{ auth()->user()->name }}</p>
-                    <p class="text-xs text-white/50 capitalize">{{ auth()->user()->role }}</p>
+                    <p class="text-sm font-semibold text-white truncate">{{ auth()->user()->username ?? 'Dapur' }}</p>
+                    <p class="text-xs text-white/50 capitalize">{{ auth()->user()->role ?? 'dapur' }}</p>
                 </div>
             </div>
         </div>
 
+        {{-- KOMPONEN INI YANG MEMBUAT TOMBOL "KEMBALI KE OWNER/ADMIN" MUNCUL KEMBALI --}}
         <div class="px-4 pt-4">
             @include('components.panel-switcher')
         </div>
 
-        <nav class="flex-1 px-4 py-4 space-y-1">
+        <nav class="px-4 py-4 space-y-1">
             @php
                 $navItems = [
-                    ['label' => __('Kitchen Display'), 'route' => 'dapur.pesanan',    'icon' => 'kitchen'],
+                    ['label' => __('Kitchen Dashboard'), 'route' => 'dapur.pesanan',    'icon' => 'kitchen'],
                     ['label' => __('Menu Availability'), 'route' => 'dapur.menu.index', 'icon' => 'availability'],
                 ];
             @endphp
@@ -52,7 +54,8 @@
                 @php $active = request()->routeIs($item['route'] . '*'); @endphp
                 <a href="{{ route($item['route']) }}"
                    class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors
-                          {{ $active ? 'bg-sultaf-gold text-sultaf-clay-dark font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
+                          {{-- Warna menu aktif disamakan dengan kasir --}}
+                          {{ $active ? 'bg-sultaf-gold text-sultaf-maroon-dark font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white' }}">
                     @switch($item['icon'])
                         @case('kitchen')
                             <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17h18M5 17V9a7 7 0 0 1 14 0v8M8 21h8"/></svg>
@@ -79,6 +82,7 @@
                 </button>
             </form>
         </div>
+        <div class="flex-1"></div>
     </aside>
 
     {{-- ===== KONTEN UTAMA ===== --}}
@@ -86,7 +90,10 @@
         <header class="bg-white/70 backdrop-blur border-b border-sultaf-border px-8 py-5 flex items-center justify-between sticky top-0 z-10">
             <div>
                 <h1 class="font-serif text-2xl font-bold text-sultaf-ink">{{ $pageTitle ?? __('Dashboard') }}</h1>
-                <p class="text-xs text-sultaf-muted mt-0.5">{{ now()->translatedFormat('l, d F Y • H:i') }}</p>
+                <p class="text-xs text-sultaf-muted mt-0.5">{{ now()->translatedFormat('l, d F Y') }}</p>
+            </div>
+            <div class="flex items-center gap-3">
+                {{-- Bagian Notifikasi Pembayaran (Opsional untuk Dapur, bisa dihapus jika tidak perlu) --}}
             </div>
         </header>
 

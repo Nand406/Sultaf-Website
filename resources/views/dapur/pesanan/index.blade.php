@@ -1,4 +1,4 @@
-<x-layouts.dapur title="Kitchen Display - Dapur Sultaf" pageTitle="Kitchen Display">
+<x-layouts.dapur title="Kitchen Display - Dapur Sultaf" pageTitle="Dashboard Dapur">
 
     @if (session('success'))
         <div class="mb-6 bg-sultaf-success-soft border border-sultaf-success/20 text-sultaf-success text-sm rounded-xl px-4 py-3">

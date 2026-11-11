@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Promo;
 use App\Models\Menu;
-use App\Models\PromoMessage;
 use App\Models\TransaksiPenjualan;
 use App\Models\User;
 use Illuminate\View\View;
@@ -17,21 +16,28 @@ class AdminDashboardController extends Controller
         $stats = [
             'total_menu' => Menu::count(),
             'menu_habis' => Menu::where('status_ketersediaan', 'habis')->count(),
-            'total_member' => User::where('role', 'member')->count(),
+            // Memasukkan 'customer' karena user yang daftar lewat web mendapat role ini
+            'total_member' => User::whereIn('role', ['member', 'customer'])->count(), 
             'promosi_aktif' => Promo::count(),
-            'pesan_terkirim' => 0, // <--- Tambahkan ini agar View tidak error
+            'pesan_terkirim' => 0, 
         ];
 
-        $menuTerlaris = TransaksiPenjualan::where('status_pembayaran', 'terverifikasi')
-            ->with('detail_transaksi.menu')           // DIUBAH: 'items.menu' -> 'detail_transaksi.menu'
+        // Perbaikan query: Mengakomodasi status 'Lunas' dan menyaring menu yang sudah dihapus
+        $menuTerlaris = TransaksiPenjualan::whereIn('status_pembayaran', ['terverifikasi', 'lunas', 'Lunas'])
+            ->with('detail_transaksi.menu')
             ->get()
-            ->pluck('detail_transaksi')               // DIUBAH: 'items' -> 'detail_transaksi'
+            ->pluck('detail_transaksi')
             ->flatten()
-            ->groupBy('id_menu')                      // DIUBAH: 'menu_id' -> 'id_menu'
-            ->map(fn($group) => [
-                'menu' => $group->first()->menu,
-                'qty' => $group->sum('jumlah'),      // DIUBAH: 'qty' -> 'jumlah'
-            ])
+            ->groupBy('id_menu')
+            ->map(function ($group) {
+                // Ambil data pertama dari grup
+                $firstDetail = $group->first();
+                return [
+                    'menu' => $firstDetail->menu ?? null, // Ambil relasi menu
+                    'qty' => $group->sum('jumlah'),
+                ];
+            })
+            ->filter(fn($item) => $item['menu'] !== null) // Saring: Buang jika menunya sudah dihapus di database
             ->sortByDesc('qty')
             ->take(5);
 
