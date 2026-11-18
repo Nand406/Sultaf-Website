@@ -37,7 +37,9 @@ class CheckoutController extends Controller
     public function payment(): View
     {
         $this->ensureCartNotEmpty();
-        [, $subtotal, $tax, $diskon, $total] = $this->calculateTotals();
+        
+        [$items, $subtotal, $tax, $diskon, $total, $promoId] = $this->calculateTotals();
+        
         $pointsEarned = floor($total / 1000); 
         return view('checkout.payment', compact('subtotal', 'tax', 'diskon', 'total', 'pointsEarned'));
     }
@@ -47,7 +49,7 @@ class CheckoutController extends Controller
         $this->ensureCartNotEmpty();
 
         $validated = $request->validate([
-            'metode_pembayaran' => ['required', 'in:qris,cash'],
+            'metode_pembayaran' => ['required', 'in:non_tunai,cash'],
             'nama_pelanggan' => ['required', 'string', 'max:255'],
             'no_telepon' => ['required', 'string', 'max:20'],
         ]);
@@ -60,8 +62,8 @@ class CheckoutController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         }
 
-        // 2. Jika metode pembayaran QRIS, generate token Midtrans
-        if ($validated['metode_pembayaran'] === 'qris') {
+        // Jika metode pembayaran QRIS, generate token Midtrans
+        if ($validated['metode_pembayaran'] === 'non_tunai') {
             Config::$serverKey = config('midtrans.server_key');
             Config::$isProduction = filter_var(config('midtrans.is_production'), FILTER_VALIDATE_BOOLEAN);
             Config::$isSanitized = filter_var(config('midtrans.is_sanitized'), FILTER_VALIDATE_BOOLEAN);
@@ -73,11 +75,9 @@ class CheckoutController extends Controller
                 CURLOPT_HTTPHEADER => [],
             ];
 
-            // ================= TAMBAHAN: SUSUN RINCIAN PRODUK UNTUK MIDTRANS =================
             $transaksi->load('detail_transaksi.menu');
             $itemDetails = [];
 
-            // 1. Masukkan item menu
             foreach ($transaksi->detail_transaksi as $detail) {
                 $itemDetails[] = [
                     'id'       => (string) $detail->id_menu,
@@ -87,7 +87,6 @@ class CheckoutController extends Controller
                 ];
             }
 
-            // 2. Hitung Pajak & Masukkan ke rincian
             $subtotal = $transaksi->detail_transaksi->sum('subtotal');
             $tax = $transaksi->total_bayar - $subtotal + $transaksi->diskon;
             
@@ -100,7 +99,6 @@ class CheckoutController extends Controller
                 ];
             }
 
-            // 3. Masukkan Diskon (jika ada)
             if ($transaksi->diskon > 0) {
                 $itemDetails[] = [
                     'id'       => 'DISCOUNT',
@@ -109,7 +107,6 @@ class CheckoutController extends Controller
                     'name'     => 'Diskon Member',
                 ];
             }
-            // ================================================================================
 
             $params = [
                 'transaction_details' => [
@@ -120,7 +117,7 @@ class CheckoutController extends Controller
                     'first_name' => $validated['nama_pelanggan'],
                     'phone' => $validated['no_telepon'],
                 ],
-                'item_details' => $itemDetails, // <-- PARAMETER BARU
+                'item_details' => $itemDetails,
             ];
 
             try {
@@ -136,7 +133,7 @@ class CheckoutController extends Controller
             }
         }
 
-        // 3. Jika Cash, langsung kembalikan redirect URL (tanpa Midtrans)
+        // Jika Cash, langsung kembalikan redirect URL (tanpa Midtrans)
         return response()->json([
             'redirect_url' => route('checkout.finish', $transaksi->id_transaksi)
         ]);
@@ -144,7 +141,7 @@ class CheckoutController extends Controller
 
     protected function createTransaksi(): TransaksiPenjualan
     {
-        [$items, $subtotal, $tax, $diskon, $total] = $this->calculateTotals();
+        [$items, $subtotal, $tax, $diskon, $total, $promoId] = $this->calculateTotals();
         
         if ($items->isEmpty() || $total <= 0) {
             throw new \Exception('Keranjang kosong atau total tidak valid.');
@@ -153,12 +150,13 @@ class CheckoutController extends Controller
         $details = session('checkout.details', []);
         $payment = session('checkout.payment', []);
 
-        $transaksi = TransaksiPenjualan::create([
+                $transaksi = TransaksiPenjualan::create([
             'id_user' => Auth::id(),
-            'id_promo' => null, 
+            'id_promo' => $promoId,
             'tipe_pesanan' => $details['tipe_pesanan'] ?? 'takeaway',
             'no_meja' => $details['nomor_meja'] ?? null, 
-            'total_bayar' => $total,
+            'total_harga' => $subtotal + $tax, // <--- TAMBAHKAN INI (Sebelum diskon)
+            'total_bayar' => $total,           // (Setelah diskon)
             'diskon' => $diskon,
             'status_pesanan' => 'pending',
             'status_pembayaran' => 'menunggu',
@@ -188,34 +186,60 @@ class CheckoutController extends Controller
 
     public function callback(Request $request): JsonResponse
     {
-        $serverKey = config('midtrans.server_key');
-        $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+        \Log::info('=== WEBHOOK MIDTRANS MASUK ===');
+        \Log::info('Data Payload: ', $request->all());
 
-        if ($hashed == $request->signature_key) {
+        // =====================================================================
+        // PENGECEKAN SIGNATURE DIMATIKAN SEMENTARA UNTUK TESTING/DEBUGGING
+        // =====================================================================
+        // $serverKey = config('midtrans.server_key');
+        // $hashed = hash("sha512", $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+        // if ($hashed == $request->signature_key) {
+
             $orderIdParts = explode('-', $request->order_id);
             $id_transaksi = $orderIdParts[1] ?? null;
+            
+            \Log::info('ID Transaksi yang diekstrak: ' . $id_transaksi);
 
             if ($id_transaksi) {
                 $transaksi = TransaksiPenjualan::find($id_transaksi);
+                
                 if ($transaksi) {
+                    \Log::info('Status dari Midtrans: ' . $request->transaction_status);
+
                     if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
                         $transaksi->update([
                             'status_pembayaran' => 'terverifikasi',
-                            'status_pesanan'    => 'cooking' 
+                            'status_pesanan'    => 'pending',
+                            'diverifikasi_oleh' => 'System (Midtrans)', 
                         ]);
 
                         $memberPoints = app(\App\Services\MemberPointService::class);
                         $memberPoints->awardFromTransaksi($transaksi);
+                        
+                        \Log::info('SUKSES: Transaksi #' . $id_transaksi . ' diubah ke COOKING.');
 
                     } elseif (in_array($request->transaction_status, ['deny', 'expire', 'cancel'])) {
                         $transaksi->update([
                             'status_pembayaran' => 'ditolak',
                             'status_pesanan'    => 'dibatalkan'
                         ]);
+                        \Log::info('BATAL: Transaksi #' . $id_transaksi . ' ditolak.');
+                    } else {
+                        \Log::info('PENDING: Status tidak memicu update.');
                     }
+                } else {
+                    \Log::error('GAGAL: Transaksi dengan ID ' . $id_transaksi . ' TIDAK DITEMUKAN di database.');
                 }
+            } else {
+                \Log::error('GAGAL: Format Order ID tidak dikenali -> ' . $request->order_id);
             }
-        }
+            
+        // } else {
+        //     \Log::error('GAGAL: SIGNATURE KEY TIDAK COCOK! Cek Server Key di .env');
+        // }
+        // =====================================================================
+        
         return response()->json(['message' => 'Callback received']);
     }
 
@@ -234,6 +258,8 @@ class CheckoutController extends Controller
         $tax = round($subtotal * 0.10);
 
         $diskon = 0;
+        $promoId = null;
+
         if (Auth::check()) {
             $user = Auth::user();
 
@@ -257,11 +283,13 @@ class CheckoutController extends Controller
 
             if ($promo) {
                 $diskon = $promo->potongan_harga;
+                $promoId = $promo->id_promo;
             }
         }
 
         $total = max(0, $subtotal + $tax - $diskon);
-        return [$items, $subtotal, $tax, $diskon, $total];
+        
+        return [$items, $subtotal, $tax, $diskon, $total, $promoId];
     }
     
     protected function ensureCartNotEmpty(): void

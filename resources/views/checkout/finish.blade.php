@@ -136,7 +136,7 @@
                         @endif
                     </div>
                     <p class="text-xs text-sultaf-muted mt-2">
-                        {{ __('Method') }}: <strong class="text-sultaf-ink">{{ strtoupper($transaksi->metode_pembayaran ?? '-') }}</strong>
+                        {{ __('Method') }}: <strong class="text-sultaf-ink">{{ strtoupper(str_replace('_', ' ', $transaksi->metode_pembayaran ?? '-')) }}</strong>
                     </p>
                 </div>
             </div>
