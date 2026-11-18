@@ -11,6 +11,7 @@
         </div>
     @endif
 
+    
     @php
         // Class ditulis literal (bukan digabung dinamis) supaya terbaca Tailwind JIT compiler
         $columns = [

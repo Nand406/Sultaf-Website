@@ -8,6 +8,7 @@ use App\Services\MemberPointService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class PembayaranController extends Controller
 {
@@ -39,7 +40,8 @@ class PembayaranController extends Controller
         $transaksi->update([
             'status_pembayaran' => 'terverifikasi',
             'status_pesanan'    => 'pending',
-            'uang_bayar'        => $request->uang_bayar, 
+            'uang_bayar'        => $request->uang_bayar,
+            'diverifikasi_oleh' => Auth::user()->username,
         ]);
 
         $member = $this->memberPoints->awardFromTransaksi($transaksi);

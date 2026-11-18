@@ -43,7 +43,7 @@
                                 <span class="text-xs font-semibold bg-sultaf-cream text-sultaf-muted px-2 py-0.5 rounded-full">Takeaway</span>
                             @endif
                             <span class="text-xs font-semibold uppercase bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
-                                {{ $transaksi->metode_pembayaran }}
+                                {{ str_replace('_', ' ', $transaksi->metode_pembayaran ?? '-') }}
                             </span>
                         </div>
 

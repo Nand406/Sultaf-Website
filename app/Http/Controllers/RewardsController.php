@@ -14,24 +14,24 @@ class RewardsController extends Controller
         $user = Auth::user();
         $member = $user->member ?? null;
 
-        // 1. Ambil semua transaksi terverifikasi milik user
+        // 1. Ambil SEMUA transaksi milik user ini yang SUDAH TERVERIFIKASI/LUNAS
         $verifiedTransactions = TransaksiPenjualan::where('id_user', $user->id_user)
             ->whereIn('status_pembayaran', ['terverifikasi', 'lunas'])
             ->latest()
             ->get();
 
-        // 2. Hitung Total Poin
+        // 2. Hitung Total Poin real-time (1 poin per Rp 1.000)
         $totalPoin = $verifiedTransactions->sum(function ($trx) {
             return floor($trx->total_bayar / 1000);
         });
 
-        // 3. Cari ID Promo yang sudah pernah dipakai user ini
+        // 3. CARI ID PROMO YANG SUDAH DIPAKAI
         $usedPromoIds = $verifiedTransactions->whereNotNull('id_promo')
             ->pluck('id_promo')
             ->unique()
             ->toArray();
 
-        // 4. Ambil daftar Promo yang BELUM dipakai
+        // 4. Ambil daftar Promo yang BELUM pernah dipakai user ini
         $benefits = Promo::whereNotIn('id_promo', $usedPromoIds)
             ->orderBy('minimal_poin')
             ->get();

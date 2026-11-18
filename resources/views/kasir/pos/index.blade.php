@@ -197,7 +197,7 @@
                                 </div>
                             </label>
                             <label class="cursor-pointer">
-                                <input type="radio" name="metode_pembayaran" value="qris" class="peer hidden" onchange="togglePaymentMethod('qris')">
+                                <input type="radio" name="metode_pembayaran" value="non_tunai" class="peer hidden" onchange="togglePaymentMethod('qris')">
                                 <div class="text-center text-xs font-semibold py-2 rounded-lg border border-sultaf-border text-sultaf-ink
                                             peer-checked:bg-sultaf-maroon peer-checked:text-white peer-checked:border-sultaf-maroon transition-colors">
                                     📱 Non Tunai

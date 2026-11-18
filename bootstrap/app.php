@@ -17,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserHasRole::class,
         ]);
 
+        $middleware->validateCsrfTokens(except: [
+            'midtrans/callback',
+        ]);
+
         // <-- 2. TAMBAHKAN BLOK INI DI SINI
         $middleware->web(append: [
             SetLocale::class,

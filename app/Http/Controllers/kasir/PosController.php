@@ -12,6 +12,7 @@ use App\Services\MemberPointService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
 
 class PosController extends Controller
 {
@@ -142,7 +143,7 @@ class PosController extends Controller
         $validated = $request->validate([
             'tipe_pesanan'      => ['required', 'in:dine_in,takeaway'],
             'nomor_meja'        => ['required_if:tipe_pesanan,dine_in', 'nullable', 'integer', 'min:1', 'max:20'],
-            'metode_pembayaran' => ['required', 'in:cash,qris'], 
+            'metode_pembayaran' => ['required', 'in:cash,non_tunai'], 
             'nama_pelanggan'    => ['nullable', 'string', 'max:255'],
             'no_telepon'        => ['nullable', 'string', 'max:20'],
             'uang_bayar'        => ['nullable', 'numeric', 'min:0'], 
@@ -210,17 +211,19 @@ class PosController extends Controller
             $uangBayar = $validated['uang_bayar'];
         }
 
-        $transaksi = TransaksiPenjualan::create([
+                $transaksi = TransaksiPenjualan::create([
             'id_user'           => $userId,
             'id_promo'          => $promoId,
             'tipe_pesanan'      => $validated['tipe_pesanan'],
             'no_meja'           => $validated['nomor_meja'] ?? null,
+            'total_harga'       => $subtotal + $tax, // <--- TAMBAHKAN INI
             'total_bayar'       => $total,
             'uang_bayar'        => $uangBayar,
             'diskon'            => $diskon,
             'status_pesanan'    => 'pending',
             'status_pembayaran' => 'terverifikasi',
             'metode_pembayaran' => $validated['metode_pembayaran'],
+            'diverifikasi_oleh' => Auth::user()->username,
         ]);
 
         foreach ($cart as $menuId => $qty) {
