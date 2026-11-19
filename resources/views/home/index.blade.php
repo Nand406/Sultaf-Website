@@ -1,17 +1,4 @@
-<!DOCTYPE html>
-<html lang="{{ app()->getLocale() }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sultaf Restaurant — {{ __('Authentic Pakistani & Yemeni Flavors') }}</title>
-    <link rel="icon" type="image/jpeg" href="{{ asset('assets/sultaf_logo.jpg') }}">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+<x-layouts.app title="Sultaf Restaurant — Authentic Pakistani & Yemeni Flavors">
 
     <style>
         .hero-video-container {
@@ -37,18 +24,6 @@
         .text-glow {
             text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
         }
-
-        /* Forces the logo to be a perfect circle without a white box */
-        .logo-circle {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #d4af37;
-            background-color: transparent;
-        }
-
-        /* Smooth SVG Wave separator */
         .custom-shape-divider-bottom {
             position: absolute;
             bottom: -1px;
@@ -66,59 +41,12 @@
             height: 80px;
         }
         .custom-shape-divider-bottom .shape-fill {
-            fill: #fcf9f2; /* Matches the About section background */
+            fill: #fcf9f2; 
         }
     </style>
-</head>
-<body class="bg-[#fcf9f2] text-sultaf-ink font-sans antialiased min-h-screen flex flex-col">
-
-    {{-- ===================== NAVBAR ===================== --}}
-    <header class="fixed top-0 left-0 right-0 z-40 transition-all duration-300 bg-sultaf-maroon/90 backdrop-blur-md border-b border-sultaf-gold/20 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20">
-                
-                {{-- Brand Logo (Fixed Circle) --}}
-                <a href="{{ route('home') }}" class="flex items-center gap-3 group">
-                    <img src="{{ asset('assets/sultaf_logo.jpg') }}" alt="Sultaf Logo" class="logo-circle group-hover:scale-105 transition-transform">
-                    <div>
-                        <div class="font-serif text-xl sm:text-2xl font-bold tracking-wide text-white flex items-center gap-2">
-                            <span>SULTAF</span>
-                        </div>
-                        <div class="text-[11px] sm:text-xs text-sultaf-gold-light tracking-wider uppercase font-semibold">{{ __('Pakistani & Yemeni Cuisine') }}</div>
-                    </div>
-                </a>
-
-                {{-- Navigation Links --}}
-                <div class="hidden lg:flex items-center gap-2">
-                    <a href="{{ route('home') }}" class="px-4 py-2 rounded-full text-sm font-bold text-sultaf-maroon-dark bg-sultaf-gold transition-colors shadow-md">Home</a>
-                    <a href="{{ route('menu.index') }}" class="px-4 py-2 rounded-full text-sm font-medium text-white hover:text-sultaf-gold hover:bg-white/10 transition-colors">Menu</a>
-                    @if(Route::has('rewards.index'))
-                        <a href="{{ route('rewards.index') }}" class="px-4 py-2 rounded-full text-sm font-medium text-white hover:text-sultaf-gold hover:bg-white/10 transition-colors">Rewards</a>
-                    @endif
-                    @if(Route::has('orders.index'))
-                        <a href="{{ route('orders.index') }}" class="px-4 py-2 rounded-full text-sm font-medium text-white hover:text-sultaf-gold hover:bg-white/10 transition-colors">History</a>
-                    @endif
-                </div>
-
-                {{-- Action CTAs --}}
-                <div class="flex items-center gap-3">
-                    @if(View::exists('components.lang-switch'))
-                        @include('components.lang-switch')
-                    @endif
-
-                    <button onclick="openWhatsAppModal()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-sultaf-gold-light hover:text-white border border-sultaf-gold/40 text-xs sm:text-sm font-bold shadow-sm transition-all hover:scale-105">
-                        <svg class="w-4 h-4 text-sultaf-gold-light" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2z"/>
-                        </svg>
-                        <span class="hidden sm:inline">WA Order</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
 
     {{-- ===================== HERO SECTION ===================== --}}
-    <section id="home" class="relative min-h-screen flex items-center justify-center pt-24 pb-32 px-4 overflow-hidden">
+    <section id="home" class="relative min-h-[85vh] flex items-center justify-center pt-10 pb-32 px-4 overflow-hidden rounded-b-3xl shadow-lg -mx-5 lg:-mx-10 xl:-mx-16 mb-10">
         
         {{-- Background Video --}}
         <div class="hero-video-container">
@@ -190,108 +118,107 @@
     </section>
 
     {{-- ===================== ABOUT US SECTION ===================== --}}
-    <section style="background-color: #fcf9f2; padding: 40px 20px 100px; position: relative; z-index: 20;">
-        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; gap: 60px;">
+    <section class="bg-[#fcf9f2] py-16 relative z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap items-center gap-12">
             
             {{-- Text Content --}}
-            <div style="flex: 1; min-width: 300px;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                    <span style="height: 2px; width: 40px; background-color: #d4af37;"></span>
-                    <h2 style="font-size: 14px; font-weight: bold; letter-spacing: 0.2em; color: #d4af37; text-transform: uppercase; margin: 0;">Our Story</h2>
+            <div class="flex-1 min-w-[300px]">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="h-0.5 w-10 bg-sultaf-gold"></span>
+                    <h2 class="text-sm font-bold tracking-widest text-sultaf-gold uppercase">Our Story</h2>
                 </div>
                 
-                <h3 style="font-size: 36px; font-family: 'Playfair Display', serif; font-weight: bold; color: #4a121a; margin-bottom: 24px; line-height: 1.2;">
+                <h3 class="text-3xl md:text-4xl font-serif font-bold text-sultaf-maroon mb-6 leading-tight">
                     A Culinary Journey from Pakistan to Yogyakarta
                 </h3>
                 
-                <p style="color: #4b5563; font-size: 18px; line-height: 1.8; margin-bottom: 24px;">
+                <p class="text-gray-600 text-lg leading-relaxed mb-6">
                     At Sultaf, we bring the rich, aromatic traditions of Pakistani and Yemeni cuisine right to the heart of Condongcatur. Our dishes are prepared with authentic spices, slow-cooked to perfection, and served with genuine hospitality.
                 </p>
                 
-                <p style="color: #4b5563; font-size: 18px; line-height: 1.8; margin-bottom: 40px;">
+                <p class="text-gray-600 text-lg leading-relaxed mb-10">
                     Whether you are craving our signature wok-cooked Chicken Karahi, the comforting Yemeni Fasolya Hamra, or our freshly baked Kunafa, every bite is crafted to remind you of home.
                 </p>
                 
                 {{-- Highlight Box --}}
-                <div style="display: flex; align-items: center; gap: 20px; border-left: 4px solid #d4af37; padding-left: 24px; padding-top: 8px; padding-bottom: 8px;">
+                <div class="flex items-center gap-5 border-l-4 border-sultaf-gold pl-6 py-2">
                     <div>
-                        <p style="font-weight: bold; color: #4a121a; font-size: 18px; margin-bottom: 4px; margin-top: 0;">Authentic Recipes</p>
-                        <p style="font-size: 14px; color: #6b7280; margin: 0;">Passed down through generations.</p>
+                        <p class="font-bold text-sultaf-maroon text-lg mb-1">Authentic Recipes</p>
+                        <p class="text-sm text-gray-500">Passed down through generations.</p>
                     </div>
                 </div>
             </div>
 
             {{-- Image Content --}}
-            <div style="flex: 1; min-width: 300px; position: relative;">
-                <img src="{{ asset('assets/ambiance.jpg') }}" alt="Sultaf Restaurant Ambiance" style="width: 100%; height: 500px; object-fit: cover; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); position: relative; z-index: 2;">
+            <div class="flex-1 min-w-[300px] relative">
+                <img src="{{ asset('assets/ambiance.jpg') }}" alt="Sultaf Restaurant Ambiance" class="w-full h-[500px] object-cover rounded-3xl shadow-2xl relative z-10">
             </div>
             
         </div>
     </section>
-     {{-- ===================== GALLERY SECTION ===================== --}}
-    <section style="background-color: #fcf9f2; padding: 60px 20px 100px; position: relative; z-index: 20; border-top: 1px solid #e5e7eb;">
-        <div style="max-width: 1200px; margin: 0 auto;">
+
+    {{-- ===================== GALLERY SECTION ===================== --}}
+    <section class="bg-[#fcf9f2] py-16 border-t border-gray-200 relative z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- Section Header --}}
-            <div style="text-align: center; margin-bottom: 50px;">
-                <h2 style="font-size: 14px; font-weight: bold; letter-spacing: 0.2em; color: #d4af37; text-transform: uppercase; margin-bottom: 10px;">Our Gallery</h2>
-                <h3 style="font-size: 36px; font-family: 'Playfair Display', serif; font-weight: bold; color: #4a121a; margin: 0;">A Feast for the Eyes</h3>
+            <div class="text-center mb-12">
+                <h2 class="text-sm font-bold tracking-widest text-sultaf-gold uppercase mb-2">Our Gallery</h2>
+                <h3 class="text-3xl md:text-4xl font-serif font-bold text-sultaf-maroon">A Feast for the Eyes</h3>
             </div>
 
             {{-- Gallery Grid --}}
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 
-                <div style="position: relative; border-radius: 16px; overflow: hidden; height: 300px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15);">
-                    <img src="{{ asset('assets/butter_chicken.jpg') }}" alt="Butter Chicken" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
+                    <img src="{{ asset('assets/butter_chicken.jpg') }}" alt="Butter Chicken" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 </div>
                 
-                <div style="position: relative; border-radius: 16px; overflow: hidden; height: 300px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15);">
-                    <img src="{{ asset('assets/ambiance.jpg') }}" alt="Restaurant Ambiance" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
+                    <img src="{{ asset('assets/ambiance.jpg') }}" alt="Restaurant Ambiance" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 </div>
 
-                <div style="position: relative; border-radius: 16px; overflow: hidden; height: 300px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15);">
-                    <img src="{{ asset('assets/chicken_karahi.jpg') }}" alt="Chicken Karahi" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
+                    <img src="{{ asset('assets/chicken_karahi.jpg') }}" alt="Chicken Karahi" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 </div>
 
-                <div style="position: relative; border-radius: 16px; overflow: hidden; height: 300px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15);">
-                    <img src="{{ asset('assets/kunafa.jpg') }}" alt="Kunafa" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
+                    <img src="{{ asset('assets/kunafa.jpg') }}" alt="Kunafa" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 </div>
 
-                <div style="position: relative; border-radius: 16px; overflow: hidden; height: 300px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15);">
-                    <img src="{{ asset('assets/hero_feast.jpg') }}" alt="Feast" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
+                    <img src="{{ asset('assets/hero_feast.jpg') }}" alt="Feast" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 </div>
 
-                <div style="position: relative; border-radius: 16px; overflow: hidden; height: 300px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.15);">
-                    <img src="{{ asset('assets/tandoori_chicken.jpg') }}" alt="Tandoori Chicken" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
+                    <img src="{{ asset('assets/tandoori_chicken.jpg') }}" alt="Tandoori Chicken" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 </div>
 
             </div>
         </div>
     </section>
 
-   
-           {{-- ===================== FOOTER ===================== --}}
-    <footer style="background-color: #4a121a; border-top: 4px solid #d4af37; padding: 40px 20px; position: relative; z-index: 10; width: 100%;">
-        <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+    {{-- ===================== FOOTER ===================== --}}
+    <footer class="bg-sultaf-maroon border-t-4 border-sultaf-gold py-12 relative z-10 w-full -mx-5 lg:-mx-10 xl:-mx-16 px-5 lg:px-10">
+        {{-- DIUBAH: flex-col items-center justify-center agar semuanya ke tengah --}}
+        <div class="max-w-7xl mx-auto flex flex-col items-center justify-center text-center gap-4">
             
-            <div style="text-align: left;">
-                <p style="font-family: 'Playfair Display', serif; font-size: 24px; color: #ffffff; margin: 0 0 4px 0; font-weight: bold; letter-spacing: 1px;">SULTAF</p>
-                <p style="font-size: 12px; color: #f3e5ab; margin: 0; text-transform: uppercase; letter-spacing: 1px;">Pakistani & Yemeni Cuisine</p>
+            <div>
+                <p class="font-serif text-3xl text-white mb-1 font-bold tracking-wide">SULTAF</p>
+                <p class="text-xs text-sultaf-gold-light uppercase tracking-widest">Pakistani & Yemeni Cuisine</p>
             </div>
             
-            <p style="font-size: 14px; color: rgba(255, 255, 255, 0.8); margin: 0; text-align: center;">
+            <p class="text-sm text-white/70">
                 © {{ date('Y') }} Sultaf Restaurant. All rights reserved.
             </p>
             
-            <a href="{{ route('login') }}" style="font-size: 14px; color: #d4af37; text-decoration: none; font-weight: bold; border-bottom: 1px solid #d4af37; padding-bottom: 2px; transition: color 0.3s;">
-                Staff & Admin Login
-            </a>
+            {{-- DIHAPUS: Link Staff & Admin Login sudah dihilangkan --}}
             
         </div>
     </footer>
 
     {{-- ===================== WHATSAPP MODAL ===================== --}}
-    <div id="whatsAppModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div id="whatsAppModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-sultaf-border relative animate-in fade-in zoom-in duration-200">
             <button onclick="closeWhatsAppModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-sultaf-cream-dark flex items-center justify-center text-sultaf-muted hover:text-sultaf-ink">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -317,8 +244,8 @@
                     <button type="button" onclick="closeWhatsAppModal()" class="flex-1 py-3.5 rounded-xl border border-sultaf-border text-sultaf-ink font-bold text-sm hover:bg-sultaf-cream transition-colors">
                         {{ __('Cancel') }}
                     </button>
-                    <button type="submit" class="flex-2 py-3.5 px-6 rounded-xl bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 border border-sultaf-gold/40">
-                        <span>{{ __('Send to WhatsApp') }}</span>
+                    <button type="submit" class="flex-1 py-3.5 px-6 rounded-xl bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 border border-sultaf-gold/40">
+                        <span>{{ __('Send') }}</span>
                     </button>
                 </div>
             </form>
@@ -344,10 +271,12 @@
 
         function openWhatsAppModal() {
             document.getElementById('whatsAppModal').classList.remove('hidden');
+            document.getElementById('whatsAppModal').classList.add('flex');
             document.body.style.overflow = 'hidden';
         }
         function closeWhatsAppModal() {
             document.getElementById('whatsAppModal').classList.add('hidden');
+            document.getElementById('whatsAppModal').classList.remove('flex');
             document.body.style.overflow = '';
         }
         function submitWhatsAppOrder(e) {
@@ -359,5 +288,5 @@
             closeWhatsAppModal();
         }
     </script>
-</body>
-</html>
+
+</x-layouts.app>
