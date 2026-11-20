@@ -115,7 +115,11 @@
                 
                 <div class="flex justify-between text-sultaf-muted text-xs pt-1 border-t border-sultaf-border mt-2">
                     <span>Metode Bayar</span>
+<<<<<<< HEAD
                     <span class="uppercase">{{ str_replace('_', ' ', $transaksi->metode_pembayaran ?? '-') }}</span>
+=======
+                    <span class="uppercase">{{ $transaksi->metode_pembayaran }}</span>
+>>>>>>> Huzaifa-branch
                 </div>
             </div>
         </div>
