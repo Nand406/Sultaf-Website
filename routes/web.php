@@ -10,6 +10,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Dapur\DapurDashboardController;
 use App\Http\Controllers\Dapur\KitchenDisplayController;
 use App\Http\Controllers\Dapur\MenuAvailabilityController as DapurMenuAvailabilityController;
+use App\Http\Controllers\HomeController; // <-- ADDED THIS
 use App\Http\Controllers\Kasir\KasirDashboardController;
 use App\Http\Controllers\Kasir\PembayaranController;
 use App\Http\Controllers\Kasir\PesananController as KasirPesananController;
@@ -33,10 +34,17 @@ Route::get('/lang/{locale}', [LocaleController::class, 'switch'])->name('lang.sw
 
 /*
 |--------------------------------------------------------------------------
-| Halaman Utama — Daftar Menu (boleh diakses tanpa login)
+| Halaman Utama — Home (boleh diakses tanpa login)
 |--------------------------------------------------------------------------
 */
-Route::get('/', [MenuController::class, 'index'])->name('menu.index');
+Route::get('/', [HomeController::class, 'index'])->name('home'); // <-- CHANGED TO HOME
+
+/*
+|--------------------------------------------------------------------------
+| Halaman Menu
+|--------------------------------------------------------------------------
+*/
+Route::get('/menu', [MenuController::class, 'index'])->name('menu.index'); // <-- CHANGED TO /menu
 
 /*
 |--------------------------------------------------------------------------
