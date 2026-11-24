@@ -13,7 +13,10 @@ class PromoMessageController extends Controller
 {
     public function index(): View
     {
-        $notifikasis = Notifikasi::with(['user', 'member'])->latest()->paginate(15);
+        $notifikasis = Notifikasi::with(['user', 'member'])
+            ->latest('id_notifikasi')
+            ->paginate(15);
+
         return view('admin.promo.index', compact('notifikasis'));
     }
 
@@ -25,35 +28,40 @@ class PromoMessageController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        // 1. DIUBAH: Validasi menggunakan 'isi_pesan'
         $validated = $request->validate([
             'judul'     => ['required', 'string', 'max:255'],
-            'isi_pesan' => ['required', 'string'], 
+            'isi_pesan' => ['required', 'string'],
             'target'    => ['required', 'in:all,specific'],
-            'id_user'   => ['nullable', 'exists:users,id_user'],
+            'id_user'   => ['required_if:target,specific', 'nullable', 'exists:users,id_user'],
+        ], [
+            'id_user.required_if' => 'Silakan pilih user terlebih dahulu jika memilih target User Tertentu.',
         ]);
 
         if ($validated['target'] === 'all') {
             $users = User::whereIn('role', ['customer', 'member'])->get();
 
+            if ($users->isEmpty()) {
+                return back()->withInput()->with('error', 'Tidak ada akun dengan role customer atau member.');
+            }
+
             foreach ($users as $user) {
                 Notifikasi::create([
                     'id_user'   => $user->id_user,
                     'id_member' => $user->member->id_member ?? null,
-                    'isi_pesan' => $validated['isi_pesan'], // 2. DIUBAH: Gunakan isi_pesan
+                    'isi_pesan' => $validated['isi_pesan'],
                     'judul'     => $validated['judul'],
                 ]);
             }
 
             return redirect()->route('admin.promo.index')
-                ->with('success', "Notifikasi berhasil dikirim ke {$users->count()} user.");
+                ->with('success', "Notifikasi berhasil dikirim ke {$users->count()} user (Semua Member & Customer).");
         }
 
         $user = User::findOrFail($validated['id_user']);
         Notifikasi::create([
             'id_user'   => $user->id_user,
             'id_member' => $user->member->id_member ?? null,
-            'isi_pesan' => $validated['isi_pesan'], // 3. DIUBAH: Gunakan isi_pesan
+            'isi_pesan' => $validated['isi_pesan'],
             'judul'     => $validated['judul'],
         ]);
 
@@ -61,9 +69,12 @@ class PromoMessageController extends Controller
             ->with('success', "Notifikasi berhasil dikirim ke {$user->username}.");
     }
 
-    public function destroy(Notifikasi $notifikasi): RedirectResponse
+    // DIUBAH: Tangkap $id langsung agar tidak bentrok dengan parameter route {promo}
+    public function destroy($id): RedirectResponse
     {
+        $notifikasi = Notifikasi::findOrFail($id);
         $notifikasi->delete();
+
         return back()->with('success', 'Notifikasi berhasil dihapus.');
     }
 }
