@@ -1,6 +1,7 @@
 @php
     $navItems = [
-        ['label' => __('Home'), 'route' => 'menu.index', 'icon' => 'home'],
+        // DIUBAH: route diubah dari 'menu.index' menjadi 'home'
+        ['label' => __('Home'), 'route' => 'home', 'icon' => 'home'],
         ['label' => __('Menu'), 'route' => 'menu.index', 'icon' => 'menu'],
         ['label' => __('Rewards'), 'route' => 'rewards.index', 'icon' => 'rewards'],
         ['label' => __('History'), 'route' => 'orders.index', 'icon' => 'history'],

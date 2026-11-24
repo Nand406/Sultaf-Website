@@ -1,4 +1,4 @@
-<x-layouts.app title="Sultaf Restaurant — Authentic Pakistani & Yemeni Flavors">
+<x-layouts.app title="Restoran Sultaf — Cita Rasa Autentik Pakistan & Yaman">
 
     <style>
         .hero-video-container {
@@ -64,7 +64,7 @@
                     <svg class="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                     </svg>
-                    Google 4.9 (150+ Reviews)
+                    Google 4.9 (150+ Ulasan)
                 </span>
                 <span class="text-white/40">|</span>
                 <span class="flex items-center gap-1.5 text-xs font-bold text-white">
@@ -76,11 +76,11 @@
             </div>
 
             <h1 class="font-serif text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-glow leading-tight mb-6">
-                {{ __('Authentic Pakistani & Yemeni Flavors') }}
+                {{ __('Cita Rasa Autentik Pakistan & Yaman') }}
             </h1>
 
             <p class="text-base sm:text-xl text-sultaf-cream-soft max-w-2xl mx-auto leading-relaxed mb-10 text-glow font-medium">
-                {{ __('Experience authentic wok-cooked Chicken Karahi, savory Yemeni Fasolya Hamra, fragrant Mandi rice, and freshly baked Kunafa in Condongcatur, Yogyakarta.') }}
+                {{ __('Nikmati kelezatan Chicken Karahi yang dimasak di wajan, Fasolya Hamra khas Yaman yang gurih, nasi Mandi yang harum, dan Kunafa yang baru dipanggang di Condongcatur, Yogyakarta.') }}
             </p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
@@ -88,23 +88,23 @@
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2z"/>
                     </svg>
-                    <span>{{ __('Order via WhatsApp') }}</span>
+                    <span>{{ __('Pesan via WhatsApp') }}</span>
                 </button>
 
                 <a href="{{ route('menu.index') }}" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white border border-white/30 font-extrabold text-base shadow-xl hover:scale-105 transition-all flex items-center justify-center gap-2">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                    <span>{{ __('Order Online (Cart & Delivery)') }}</span>
+                    <span>{{ __('Pesan Online (Keranjang & Pengantaran)') }}</span>
                 </a>
             </div>
 
             <div class="inline-flex flex-wrap items-center justify-center gap-4 sm:gap-8 bg-black/40 backdrop-blur-md border border-white/20 px-6 py-3 rounded-2xl text-xs sm:text-sm text-sultaf-cream-soft">
                 <div class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-sultaf-gold-light" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0 z"/></svg>
-                    <span>{{ __('Outdoor Seating') }}</span>
+                    <span>{{ __('Area Duduk Luar Ruangan') }}</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <svg class="w-4 h-4 text-sultaf-gold-light" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"/></svg>
-                    <span>{{ __('High-Speed Wi-Fi') }}</span>
+                    <span>{{ __('Wi-Fi Berkecepatan Tinggi') }}</span>
                 </div>
             </div>
         </div>
@@ -125,46 +125,45 @@
             <div class="flex-1 min-w-[300px]">
                 <div class="flex items-center gap-2 mb-4">
                     <span class="h-0.5 w-10 bg-sultaf-gold"></span>
-                    <h2 class="text-sm font-bold tracking-widest text-sultaf-gold uppercase">Our Story</h2>
+                    <h2 class="text-sm font-bold tracking-widest text-sultaf-gold uppercase">Cerita Kami</h2>
                 </div>
                 
                 <h3 class="text-3xl md:text-4xl font-serif font-bold text-sultaf-maroon mb-6 leading-tight">
-                    A Culinary Journey from Pakistan to Yogyakarta
+                    Perjalanan Kuliner dari Pakistan ke Yogyakarta
                 </h3>
                 
                 <p class="text-gray-600 text-lg leading-relaxed mb-6">
-                    At Sultaf, we bring the rich, aromatic traditions of Pakistani and Yemeni cuisine right to the heart of Condongcatur. Our dishes are prepared with authentic spices, slow-cooked to perfection, and served with genuine hospitality.
+                    Di Sultaf, kami menghadirkan tradisi kuliner Pakistan dan Yaman yang kaya serta penuh aroma langsung ke jantung Condongcatur. Hidangan kami disiapkan dengan rempah autentik, dimasak perlahan hingga sempurna, dan disajikan dengan keramahan yang tulus.
                 </p>
                 
                 <p class="text-gray-600 text-lg leading-relaxed mb-10">
-                    Whether you are craving our signature wok-cooked Chicken Karahi, the comforting Yemeni Fasolya Hamra, or our freshly baked Kunafa, every bite is crafted to remind you of home.
+                    Baik saat Anda menginginkan Chicken Karahi andalan kami yang dimasak di wajan, Fasolya Hamra khas Yaman yang menenangkan, maupun Kunafa yang baru dipanggang, setiap suapan dibuat untuk menghadirkan nuansa rumah.
                 </p>
                 
                 {{-- Highlight Box --}}
                 <div class="flex items-center gap-5 border-l-4 border-sultaf-gold pl-6 py-2">
                     <div>
-                        <p class="font-bold text-sultaf-maroon text-lg mb-1">Authentic Recipes</p>
-                        <p class="text-sm text-gray-500">Passed down through generations.</p>
+                        <p class="font-bold text-sultaf-maroon text-lg mb-1">Resep Autentik</p>
+                        <p class="text-sm text-gray-500">Diwariskan secara turun-temurun.</p>
                     </div>
                 </div>
             </div>
 
             {{-- Image Content --}}
             <div class="flex-1 min-w-[300px] relative">
-                <img src="{{ asset('assets/ambiance.jpg') }}" alt="Sultaf Restaurant Ambiance" class="w-full h-[500px] object-cover rounded-3xl shadow-2xl relative z-10">
+                <img src="{{ asset('assets/ambiance.jpg') }}" alt="Suasana Restoran Sultaf" class="w-full h-[500px] object-cover rounded-3xl shadow-2xl relative z-10">
             </div>
             
         </div>
     </section>
 
-    {{-- ===================== GALLERY SECTION ===================== --}}
-    <section class="bg-[#fcf9f2] py-16 border-t border-gray-200 relative z-20">
+ {{-- ===================== GALLERY SECTION ===================== --}}
+    <section class="bg-[#fcf9f2] py-20 border-t border-gray-200 relative z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             {{-- Section Header --}}
-            <div class="text-center mb-12">
-                <h2 class="text-sm font-bold tracking-widest text-sultaf-gold uppercase mb-2">Our Gallery</h2>
-                <h3 class="text-3xl md:text-4xl font-serif font-bold text-sultaf-maroon">A Feast for the Eyes</h3>
+            <div class="text-center mb-14 sm:mb-16">
+                <h2 class="text-2xl md:text-3xl font-serif font-bold tracking-wide text-sultaf-maroon">Galeri Kami</h2>
             </div>
 
             {{-- Gallery Grid --}}
@@ -175,7 +174,7 @@
                 </div>
                 
                 <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
-                    <img src="{{ asset('assets/ambiance.jpg') }}" alt="Restaurant Ambiance" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <img src="{{ asset('assets/ambiance.jpg') }}" alt="Suasana Restoran" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 </div>
 
                 <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
@@ -187,7 +186,7 @@
                 </div>
 
                 <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
-                    <img src="{{ asset('assets/hero_feast.jpg') }}" alt="Feast" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    <img src="{{ asset('assets/hero_feast.jpg') }}" alt="Hidangan Utama" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                 </div>
 
                 <div class="relative rounded-2xl overflow-hidden h-[300px] shadow-lg group">
@@ -205,11 +204,11 @@
             
             <div>
                 <p class="font-serif text-3xl text-white mb-1 font-bold tracking-wide">SULTAF</p>
-                <p class="text-xs text-sultaf-gold-light uppercase tracking-widest">Pakistani & Yemeni Cuisine</p>
+                <p class="text-xs text-sultaf-gold-light uppercase tracking-widest">Kuliner Pakistan & Yaman</p>
             </div>
             
             <p class="text-sm text-white/70">
-                © {{ date('Y') }} Sultaf Restaurant. All rights reserved.
+                © {{ date('Y') }} Restoran Sultaf. Hak cipta dilindungi undang-undang.
             </p>
             
             {{-- DIHAPUS: Link Staff & Admin Login sudah dihilangkan --}}
@@ -228,12 +227,12 @@
                 <div class="p-2.5 rounded-xl bg-sultaf-maroon/10 text-sultaf-maroon">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2z"/></svg>
                 </div>
-                <h3 class="font-serif text-xl font-bold text-sultaf-ink">{{ __('Quick WhatsApp Order') }}</h3>
+                <h3 class="font-serif text-xl font-bold text-sultaf-ink">{{ __('Pesan Cepat via WhatsApp') }}</h3>
             </div>
 
             <form onsubmit="submitWhatsAppOrder(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold uppercase text-sultaf-muted mb-1">{{ __('Select Dish') }}</label>
+                    <label class="block text-xs font-bold uppercase text-sultaf-muted mb-1">{{ __('Pilih Menu') }}</label>
                     <select id="waItemSelect" class="w-full border border-sultaf-border bg-sultaf-cream/40 rounded-xl px-4 py-3 text-sm font-medium text-sultaf-ink focus:ring-2 focus:ring-sultaf-maroon/30 focus:outline-none">
                         <option value="Chicken Karahi">Chicken Karahi</option>
                         <option value="Zurbiyan Rice">Zurbiyan Rice</option>
@@ -242,10 +241,10 @@
                 </div>
                 <div class="pt-3 flex gap-3">
                     <button type="button" onclick="closeWhatsAppModal()" class="flex-1 py-3.5 rounded-xl border border-sultaf-border text-sultaf-ink font-bold text-sm hover:bg-sultaf-cream transition-colors">
-                        {{ __('Cancel') }}
+                        {{ __('Batal') }}
                     </button>
                     <button type="submit" class="flex-1 py-3.5 px-6 rounded-xl bg-sultaf-maroon hover:bg-sultaf-maroon-dark text-white font-bold text-sm shadow-md transition-colors flex items-center justify-center gap-2 border border-sultaf-gold/40">
-                        <span>{{ __('Send') }}</span>
+                        <span>{{ __('Kirim') }}</span>
                     </button>
                 </div>
             </form>
@@ -282,7 +281,7 @@
         function submitWhatsAppOrder(e) {
             e.preventDefault();
             const dish = document.getElementById('waItemSelect').value;
-            const message = `Halo Sultaf Restaurant!\n\nSaya ingin memesan:\n* ${waQty}x ${dish}\n\nMohon konfirmasi pesanan. Terima kasih!`;
+            const message = `Halo Restoran Sultaf!\n\nSaya ingin memesan:\n* ${waQty}x ${dish}\n\nMohon konfirmasi pesanan. Terima kasih!`;
             const waUrl = `https://wa.me/${WA_PHONE}?text=${encodeURIComponent(message)}`;
             window.open(waUrl, '_blank');
             closeWhatsAppModal();
